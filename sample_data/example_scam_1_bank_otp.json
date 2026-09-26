@@ -1,0 +1,8 @@
+{
+  "messages": [
+    "Hi, I am from your bank.",
+    "There is an urgent problem with your account. It will be suspended within 24 hours.",
+    "Click this link to verify your account: http://secure-bankverify.xyz/login",
+    "Please enter your OTP to complete verification."
+  ]
+}

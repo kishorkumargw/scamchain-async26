@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ScamChain — Attack Chain Reconstruction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="vendor/vis-network.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js';document.getElementById('libWarning').style.display='block';"></script>
+<script src="i18n.js"></script>
+<style>
+  :root{
+    --bg: #0d1117; --panel: #12161f; --panel-border: #232a38;
+    --ink: #e6e9f0; --ink-dim: #8b93a7; --line: #1d2330;
+    --accent: #5b8cff; --good: #3fbf72; --bad: #e04f4f;
+    --s-contact: #5b7fa6; --s-trust: #8a6fd6; --s-pressure: #d69e3f;
+    --s-redirect: #e0793f; --s-extraction: #e04f4f;
+    --risk-low: #3fbf72; --risk-medium: #d69e3f; --risk-high: #e04f4f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(circle at 15% 0%, rgba(91,140,255,0.07), transparent 40%), var(--bg);
+    color:var(--ink); font-family:'Space Grotesk', 'Noto Sans Kannada', system-ui, sans-serif;
+    min-height:100vh;
+  }
+  html[lang="kn"] body{ font-family:'Noto Sans Kannada','Space Grotesk',system-ui,sans-serif; }
+  .wrap{max-width:1180px;margin:0 auto;padding:32px 24px 80px;}
+
+  header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:20px;}
+  header .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  header h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-0.01em;}
+  header .tag{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-dim);}
+
+  .langToggle{display:flex;border:1px solid var(--panel-border);border-radius:20px;overflow:hidden;flex-shrink:0;}
+  .langToggle button{background:#161b26;color:var(--ink-dim);border:none;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .langToggle button.active{background:var(--accent);color:#0a0d13;}
+
+  .tagline{font-size:14px;color:var(--ink);background:rgba(91,140,255,0.08);border:1px solid rgba(91,140,255,0.3);border-radius:8px;padding:12px 16px;margin-bottom:20px;line-height:1.5;}
+
+  #libWarning{display:none;background:rgba(214,158,63,0.12);border:1px solid rgba(214,158,63,0.4);color:#d69e3f;font-size:12px;padding:8px 12px;border-radius:6px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;}
+
+  #connBar{display:flex;align-items:center;gap:10px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-dim);flex-wrap:wrap;}
+  #connDot{width:8px;height:8px;border-radius:50%;background:var(--ink-dim);flex-shrink:0;}
+  #connDot.ok{background:var(--good);} #connDot.bad{background:var(--bad);}
+  #apiBase{background:#0a0d13;border:1px solid var(--panel-border);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12px;padding:5px 8px;border-radius:5px;width:220px;}
+  #connBar button{background:none;border:1px solid var(--panel-border);color:var(--ink-dim);border-radius:5px;font-size:11px;padding:5px 9px;cursor:pointer;}
+
+  .pipeline{display:flex;align-items:stretch;gap:0;margin-bottom:24px;border:1px solid var(--panel-border);border-radius:10px;overflow:hidden;background:var(--panel);}
+  .pipeline .step{flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--panel-border);}
+  .pipeline .step:last-child{border-right:none;}
+  .pipeline .step .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);}
+  .pipeline .step .name{font-size:12px;font-weight:600;margin-top:2px;}
+  .pipeline .step.done{background:rgba(91,140,255,0.08);}
+  .pipeline .step.done .num{color:var(--accent);}
+
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:20px;}
+  @media (max-width:880px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:10px;padding:18px;}
+  .panel + .panel{margin-top:20px;}
+  .panel h2{font-size:13px;margin:0 0 4px;color:var(--ink);font-weight:700;display:flex;align-items:center;gap:8px;}
+  .panel h2 .stepno{font-family:'JetBrains Mono',monospace;font-size:10px;color:#0a0d13;background:var(--accent);border-radius:4px;padding:1px 6px;flex-shrink:0;}
+  .panel .hint{font-size:11.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.5;}
+
+  select#scenarioSelect{width:100%;background:#0a0d13;border:1px solid var(--panel-border);color:var(--ink);font-family:inherit;font-size:13px;padding:9px 10px;border-radius:6px;margin-bottom:6px;}
+
+  .msg-row{display:flex;gap:8px;margin-bottom:8px;}
+  .msg-row textarea{flex:1;resize:vertical;min-height:52px;background:#0a0d13;border:1px solid var(--panel-border);border-radius:6px;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:10px;line-height:1.5;}
+  .msg-row textarea:focus{outline:1px solid var(--accent);border-color:var(--accent);}
+  .msg-row .rm{background:none;border:none;color:var(--ink-dim);cursor:pointer;font-size:16px;padding:4px 8px;}
+  .msg-row .rm:hover{color:var(--s-extraction);}
+
+  .btn{border:1px solid var(--panel-border);background:#161b26;color:var(--ink);padding:9px 14px;border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer;font-weight:600;}
+  .btn:hover:not(:disabled){border-color:var(--accent);}
+  .btn:disabled{opacity:0.5;cursor:default;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#0a0d13;}
+  .btn.primary:hover:not(:disabled){filter:brightness(1.08);}
+  .btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  #verdict{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-radius:10px;margin-bottom:20px;border:1px solid var(--panel-border);flex-wrap:wrap;}
+  #verdict.risk-LOW{background:linear-gradient(90deg, rgba(63,191,114,0.14), rgba(63,191,114,0.03));border-color:rgba(63,191,114,0.4);}
+  #verdict.risk-MEDIUM{background:linear-gradient(90deg, rgba(214,158,63,0.14), rgba(214,158,63,0.03));border-color:rgba(214,158,63,0.4);}
+  #verdict.risk-HIGH{background:linear-gradient(90deg, rgba(224,79,79,0.14), rgba(224,79,79,0.03));border-color:rgba(224,79,79,0.4);}
+  #verdict .label{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px;letter-spacing:0.02em;}
+  #verdict .risktag{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;background:#0a0d13;}
+  #verdict.risk-LOW .risktag{color:var(--risk-low);} #verdict.risk-MEDIUM .risktag{color:var(--risk-medium);} #verdict.risk-HIGH .risktag{color:var(--risk-high);}
+
+  .ladder{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:6px;}
+  .ladder .stage{flex:1;min-width:110px;text-align:center;padding:10px 6px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);color:var(--ink-dim);font-size:11px;font-family:'JetBrains Mono',monospace;cursor:pointer;}
+  .ladder .stage.active{color:#0a0d13;font-weight:600;}
+  .ladder .stage.selected{outline:2px solid var(--accent);}
+  .ladder .arrow{color:var(--ink-dim);font-size:14px;flex:0;}
+  #stageDetail{margin-top:12px;padding:12px 14px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);font-size:12.5px;line-height:1.7;}
+  #stageDetail .row{margin-bottom:6px;} #stageDetail b{color:var(--ink);}
+  #stageDetail .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  #stageDetail .chip{background:#161b26;border:1px solid var(--panel-border);border-radius:12px;padding:2px 9px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+  .timeline{position:relative;padding-left:22px;}
+  .timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--panel-border);}
+  .tl-item{position:relative;padding-bottom:18px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-dot{position:absolute;left:-22px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg);}
+  .tl-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+  .tl-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-dim);}
+  .tl-preview{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);background:#0a0d13;border:1px solid var(--panel-border);border-radius:6px;padding:8px 10px;margin:4px 0;}
+  .tl-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .tl-chip{font-size:10.5px;background:#161b26;border:1px solid var(--panel-border);border-radius:12px;padding:2px 8px;font-family:'JetBrains Mono',monospace;color:var(--ink-dim);}
+
+  #graph{height:360px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);}
+  #graphError{display:none;padding:14px;font-size:12.5px;color:var(--ink-dim);text-align:center;}
+
+  .evidence-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:600px){.evidence-grid{grid-template-columns:1fr;}}
+  .evidence-col h3{font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-dim);margin:0 0 8px;}
+  .chip-list{display:flex;flex-direction:column;gap:6px;}
+  .chip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0a0d13;border:1px solid var(--panel-border);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+  .chip.flagged{border-color:rgba(224,79,79,0.5);color:#f0a8a8;}
+  .chip .count{color:var(--ink-dim);font-size:10.5px;}
+  .empty-inline{color:var(--ink-dim);font-size:12px;font-style:italic;}
+
+  .stagecard{border:1px solid var(--panel-border);border-radius:8px;padding:12px 14px;margin-bottom:10px;background:#0a0d13;}
+  .stagecard:last-child{margin-bottom:0;}
+  .stagecard .sc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .stagecard .sc-badge{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;color:#0a0d13;font-weight:600;}
+  .stagecard .sc-row{font-size:12.5px;margin-bottom:5px;line-height:1.6;}
+  .stagecard .sc-row b{color:var(--ink-dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.03em;display:block;margin-bottom:2px;}
+
+  .story p{font-size:13px;line-height:1.7;color:var(--ink-dim);margin:4px 0;}
+
+  .response-block{border:1px solid var(--panel-border);border-radius:8px;padding:14px 16px;margin-bottom:10px;background:#0a0d13;}
+  .response-block b{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;color:var(--accent);}
+  .response-block p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink);}
+  .response-block ol{margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;color:var(--ink);}
+  .response-block.risky b{color:var(--risk-high);}
+
+  table.msgtable{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.msgtable th{text-align:left;color:var(--ink-dim);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);font-size:11px;}
+  table.msgtable td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.msgtable td.txt{font-family:'JetBrains Mono',monospace;color:var(--ink-dim);max-width:340px;}
+  .stagebadge{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:20px;color:#0a0d13;font-weight:600;white-space:nowrap;}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--ink-dim);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  .empty{color:var(--ink-dim);font-size:13px;padding:40px 0;text-align:center;}
+  #apiState{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:8px;min-height:14px;}
+  #apiState.err{color:var(--bad);} #apiState.working{color:var(--accent);}
+  .spinner{display:inline-block;width:11px;height:11px;border:2px solid var(--panel-border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <h1>ScamChain</h1>
+      <span class="tag" data-i18n="brand_tag">attack-chain reconstruction — MVP</span>
+    </div>
+    <div class="langToggle">
+      <button id="langEn" class="active">English</button>
+      <button id="langKn">ಕನ್ನಡ</button>
+    </div>
+  </header>
+
+  <div class="tagline" data-i18n="tagline">ScamChain does not simply classify a message. It reconstructs the attack behind multiple connected signals.</div>
+
+  <div id="libWarning">vendor/vis-network.min.js failed to load — falling back to the CDN copy.</div>
+
+  <div id="connBar">
+    <span id="connDot"></span>
+    <span id="connText" data-i18n="conn_checking">checking backend…</span>
+    <input id="apiBase" type="text" value="http://127.0.0.1:8000" spellcheck="false">
+    <button id="recheckBtn" data-i18n="recheck_btn">recheck</button>
+  </div>
+
+  <div class="pipeline" id="pipeline">
+    <div class="step" data-step="1"><div class="num">01</div><div class="name" data-i18n="step_signals">Signals</div></div>
+    <div class="step" data-step="2"><div class="num">02</div><div class="name" data-i18n="step_evidence">Evidence</div></div>
+    <div class="step" data-step="3"><div class="num">03</div><div class="name" data-i18n="step_relationships">Relationships</div></div>
+    <div class="step" data-step="4"><div class="num">04</div><div class="name" data-i18n="step_chain">Attack Chain</div></div>
+    <div class="step" data-step="5"><div class="num">05</div><div class="name" data-i18n="step_explanation">Explanation</div></div>
+    <div class="step" data-step="6"><div class="num">06</div><div class="name" data-i18n="step_response">Response</div></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- LEFT: input -->
+    <div>
+      <div class="panel">
+        <h2 data-i18n="scenario_label">Choose a demo scenario</h2>
+        <p class="hint" data-i18n="scenario_hint">Every scenario runs through the exact same ScamChain pipeline.</p>
+        <select id="scenarioSelect"><option value="" data-i18n="scenario_placeholder">— select a scenario —</option></select>
+      </div>
+
+      <div class="panel">
+        <h2 data-i18n="input_heading">Input</h2>
+        <p class="hint" data-i18n="input_hint">Paste in the raw signals in order received, or pick a scenario above.</p>
+        <div id="msgList"></div>
+        <div class="btn-row">
+          <button class="btn" id="addMsg" data-i18n="add_msg_btn">+ add message</button>
+          <button class="btn primary" id="analyzeBtn" data-i18n="analyze_btn">Analyze Attack</button>
+        </div>
+        <div id="apiState"></div>
+      </div>
+
+      <div class="panel">
+        <h2 data-i18n="legend_heading">Legend</h2>
+        <div class="legend" id="legendBox"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: results, in exact pipeline order -->
+    <div>
+      <div id="verdict" style="display:none;">
+        <div><div class="label" id="verdictLabel">—</div></div>
+        <div class="risktag" id="riskTag">—</div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">01</span> <span data-i18n="signals_heading">Signals detected</span></h2>
+        <p class="hint" data-i18n="signals_hint">Every suspicious phrase found in each message.</p>
+        <table class="msgtable" id="msgTable">
+          <thead><tr><th>#</th><th data-i18n="signals_heading">Message</th><th data-i18n="step_chain">Stage</th><th data-i18n="evidence_label">Matched signals</th></tr></thead>
+          <tbody><tr><td colspan="4" class="empty-inline">—</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">02</span> <span data-i18n="evidence_heading">Evidence</span></h2>
+        <p class="hint" data-i18n="evidence_hint">Concrete entities pulled out of the signals above.</p>
+        <div class="evidence-grid">
+          <div class="evidence-col"><h3 data-i18n="ev_orgs">Organizations claimed</h3><div class="chip-list" id="evOrgs"></div></div>
+          <div class="evidence-col"><h3 data-i18n="ev_urls">URLs found</h3><div class="chip-list" id="evUrls"></div></div>
+          <div class="evidence-col"><h3 data-i18n="ev_actions">Requested actions</h3><div class="chip-list" id="evActions"></div></div>
+          <div class="evidence-col"><h3 data-i18n="ev_creds">Credentials requested</h3><div class="chip-list" id="evCreds"></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">03</span> <span data-i18n="relationships_heading">Relationships — evidence graph</span></h2>
+        <p class="hint" data-i18n="relationships_hint">How the sender, messages, entities and signals connect.</p>
+        <div id="graph"></div>
+        <div id="graphError" data-i18n="graph_error"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">04</span> <span data-i18n="chain_heading">Attack chain</span></h2>
+        <p class="hint" data-i18n="chain_hint">Click a stage to see its supporting evidence.</p>
+        <div class="ladder" id="ladder"></div>
+        <div id="stageDetail"><span class="empty-inline" data-i18n="select_stage_hint">Select a stage above.</span></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">04</span> <span data-i18n="timeline_heading">Attack timeline</span></h2>
+        <p class="hint" data-i18n="timeline_hint">The same chain, message by message.</p>
+        <div class="timeline" id="timelineBox"><span class="empty-inline">—</span></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">05</span> <span data-i18n="explanation_heading">Explanation</span></h2>
+        <p class="hint" data-i18n="explanation_hint">For every stage reached: evidence, why it matters, attacker's goal.</p>
+        <div id="stageBreakdown"></div>
+        <h3 style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-dim);margin:14px 0 8px;" data-i18n="inference_heading">Overall interpretation</h3>
+        <div class="story" id="inferenceBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">06</span> <span data-i18n="response_heading">Defensive response</span></h2>
+        <div class="response-block"><b data-i18n="what_happened">What happened</b><p id="respWhatHappened">—</p></div>
+        <div class="response-block risky"><b data-i18n="why_risky">Why it is risky</b><p id="respWhyRisky">—</p></div>
+        <div class="response-block"><b data-i18n="what_to_do">What to do now</b><ol id="respWhatToDo"></ol></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const STAGE_ORDER = ["CONTACT","TRUST_IMPERSONATION","PRESSURE","REDIRECT","EXTRACTION"];
+const STAGE_COLOR = {
+  CONTACT: getComputedStyle(document.documentElement).getPropertyValue('--s-contact').trim(),
+  TRUST_IMPERSONATION: getComputedStyle(document.documentElement).getPropertyValue('--s-trust').trim(),
+  PRESSURE: getComputedStyle(document.documentElement).getPropertyValue('--s-pressure').trim(),
+  REDIRECT: getComputedStyle(document.documentElement).getPropertyValue('--s-redirect').trim(),
+  EXTRACTION: getComputedStyle(document.documentElement).getPropertyValue('--s-extraction').trim(),
+};
+const STAGE_LABEL_STATIC = {
+  en: {CONTACT:"Contact", TRUST_IMPERSONATION:"Trust / Impersonation", PRESSURE:"Pressure", REDIRECT:"Redirect", EXTRACTION:"Extraction"},
+  kn: {CONTACT:"ಸಂಪರ್ಕ", TRUST_IMPERSONATION:"ನಂಬಿಕೆ / ಸೋಗು", PRESSURE:"ಒತ್ತಡ", REDIRECT:"ಮರುನಿರ್ದೇಶನ", EXTRACTION:"ಮಾಹಿತಿ ಕದಿಯುವಿಕೆ"},
+};
+
+let scenarios = [];
+let lastResult = null; // last successful /analyze response, so language switch can re-render without re-fetching text bits that need it
+
+const msgList = document.getElementById('msgList');
+const apiBaseInput = document.getElementById('apiBase');
+function getApiBase(){ return apiBaseInput.value.trim().replace(/\/+$/,''); }
+
+function addMsgRow(value=""){
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  const ta = document.createElement('textarea');
+  ta.value = value;
+  const rm = document.createElement('button');
+  rm.className = 'rm'; rm.title = 'remove'; rm.textContent = '✕';
+  rm.onclick = () => row.remove();
+  row.appendChild(ta); row.appendChild(rm);
+  msgList.appendChild(row);
+}
+function getMessages(){
+  return [...msgList.querySelectorAll('textarea')].map(t => t.value.trim()).filter(t => t.length > 0);
+}
+document.getElementById('addMsg').onclick = () => addMsgRow();
+addMsgRow(); addMsgRow();
+
+function renderLegend(){
+  const box = document.getElementById('legendBox');
+  box.innerHTML = STAGE_ORDER.map(s =>
+    `<span><i style="background:${STAGE_COLOR[s]}"></i>${STAGE_LABEL_STATIC[currentLang][s]}</span>`
+  ).join('');
+}
+
+// ---------- language ----------
+function setLang(lang){
+  applyStaticTranslations(lang);
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langKn').classList.toggle('active', lang === 'kn');
+  renderLegend();
+  populateScenarioDropdown();
+  checkConnection();
+  // If we already have a result on screen, re-run the SAME messages in the
+  // new language so the demo shows language affecting the analysis live,
+  // without the presenter needing to click Analyze again.
+  if (lastResult !== null && getMessages().length > 0) analyze();
+}
+document.getElementById('langEn').onclick = () => setLang('en');
+document.getElementById('langKn').onclick = () => setLang('kn');
+
+// ---------- scenarios ----------
+async function loadScenarios(){
+  try{
+    const res = await fetch(`${getApiBase()}/scenarios`);
+    if(!res.ok) return;
+    const data = await res.json();
+    scenarios = data.scenarios || [];
+    populateScenarioDropdown();
+  }catch(e){ /* connection banner already reports backend issues */ }
+}
+function populateScenarioDropdown(){
+  const sel = document.getElementById('scenarioSelect');
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${t('scenario_placeholder')}</option>`;
+  scenarios.forEach(sc => {
+    const opt = document.createElement('option');
+    opt.value = sc.id;
+    opt.textContent = currentLang === 'kn' ? sc.label_kn : sc.label_en;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
+document.getElementById('scenarioSelect').onchange = (e) => {
+  const sc = scenarios.find(s => s.id === e.target.value);
+  if(!sc) return;
+  msgList.innerHTML = "";
+  sc.messages.forEach(addMsgRow);
+};
+
+// ---------- connection check ----------
+async function checkConnection(){
+  const dot = document.getElementById('connDot');
+  const text = document.getElementById('connText');
+  dot.className = ''; text.textContent = t('conn_checking');
+  try{
+    const res = await fetch(`${getApiBase()}/health`, {method:'GET'});
+    if(!res.ok) throw new Error('bad status');
+    dot.className = 'ok'; text.textContent = t('conn_ok');
+    if (scenarios.length === 0) loadScenarios();
+  }catch(e){
+    dot.className = 'bad'; text.textContent = t('conn_bad');
+  }
+}
+document.getElementById('recheckBtn').onclick = () => { checkConnection(); loadScenarios(); };
+
+// ---------- rendering ----------
+let network = null;
+
+function setPipelineStep(n){
+  document.querySelectorAll('.pipeline .step').forEach(el => {
+    el.classList.toggle('done', parseInt(el.dataset.step,10) <= n);
+  });
+}
+
+function renderLadder(chain, stageBreakdown){
+  const ladder = document.getElementById('ladder');
+  ladder.innerHTML = "";
+  STAGE_ORDER.forEach((stage, i) => {
+    if(i>0){
+      const arrow = document.createElement('div');
+      arrow.className = 'arrow'; arrow.textContent = '→';
+      ladder.appendChild(arrow);
+    }
+    const el = document.createElement('div');
+    const isActive = chain.includes(stage);
+    el.className = 'stage' + (isActive ? ' active' : '');
+    if(isActive) el.style.background = STAGE_COLOR[stage];
+    el.textContent = STAGE_LABEL_STATIC[currentLang][stage];
+    el.dataset.stage = stage;
+    if(isActive){
+      el.onclick = () => selectStage(stage, stageBreakdown);
+    }
+    ladder.appendChild(el);
+  });
+  // auto-select the final (most severe) stage reached
+  if(chain.length) selectStage(chain[chain.length-1], stageBreakdown);
+}
+
+function selectStage(stage, stageBreakdown){
+  document.querySelectorAll('.ladder .stage').forEach(el => el.classList.toggle('selected', el.dataset.stage === stage));
+  const entry = stageBreakdown.find(s => s.stage === stage);
+  const box = document.getElementById('stageDetail');
+  if(!entry){ box.innerHTML = `<span class="empty-inline">${t('select_stage_hint')}</span>`; return; }
+  const chips = entry.evidence.map(e => `<span class="chip">${e.replace(/</g,'&lt;')}</span>`).join('') || `<span class="empty-inline">${t('none_yet')}</span>`;
+  box.innerHTML = `
+    <div class="row"><b>${t('evidence_label')}:</b></div>
+    <div class="chips">${chips}</div>
+    <div class="row" style="margin-top:10px;"><b>${t('why_it_matters')}:</b> ${entry.why_it_matters}</div>
+    <div class="row"><b>${t('attacker_goal')}:</b> ${entry.attacker_goal}</div>
+  `;
+}
+
+function renderTimeline(timeline){
+  const box = document.getElementById('timelineBox');
+  box.innerHTML = "";
+  timeline.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'tl-item';
+    const color = STAGE_COLOR[item.stage] || '#3a4256';
+    const chips = item.evidence.map(e => `<span class="tl-chip">${e.replace(/</g,'&lt;')}</span>`).join('');
+    div.innerHTML = `
+      <div class="tl-dot" style="background:${color}"></div>
+      <div class="tl-head"><span class="tl-num">#${item.index+1}</span><span class="stagebadge" style="background:${color}">${item.stage_label}</span></div>
+      <div class="tl-preview">${item.preview.replace(/</g,'&lt;')}</div>
+      <div class="tl-chips">${chips}</div>
+    `;
+    box.appendChild(div);
+  });
+}
+
+function renderEvidence(graph){
+  const orgs = graph.nodes.filter(n => n.type === 'organization');
+  const urls = graph.nodes.filter(n => n.type === 'url');
+  const actions = graph.nodes.filter(n => n.type === 'requested_action');
+  const creds = graph.nodes.filter(n => n.type === 'credential');
+
+  const fill = (id, items, flaggedFn) => {
+    const el = document.getElementById(id);
+    el.innerHTML = items.length ? '' : `<span class="empty-inline">${t('none_yet')}</span>`;
+    items.forEach(it => {
+      const d = document.createElement('div');
+      const flagged = flaggedFn ? flaggedFn(it) : false;
+      d.className = 'chip' + (flagged ? ' flagged' : '');
+      const label = it.label.length > 34 ? it.label.slice(0,34)+'…' : it.label;
+      d.innerHTML = `<span title="${it.label.replace(/"/g,'&quot;')}">${label}</span>` + (flaggedFn ? `<span class="count">${flagged?'flagged':'ok'}</span>` : '');
+      el.appendChild(d);
+    });
+  };
+  fill('evOrgs', orgs);
+  fill('evUrls', urls, u => u.suspicious);
+  fill('evActions', actions);
+  fill('evCreds', creds);
+}
+
+function renderGraph(graph){
+  const graphError = document.getElementById('graphError');
+  const container = document.getElementById('graph');
+  if(typeof vis === 'undefined'){
+    container.style.display = 'none'; graphError.style.display = 'block';
+    return;
+  }
+  container.style.display = 'block'; graphError.style.display = 'none';
+  try{
+    const nodes = graph.nodes.map(n => {
+      let color = '#3a4256', shape='dot', size=14, font={color:'#e6e9f0', size:11, face:'JetBrains Mono'};
+      if(n.type === 'message'){ color = STAGE_COLOR[n.stage] || '#5b7fa6'; shape='box'; size=18; font.color = '#0a0d13'; }
+      else if(n.type === 'attacker'){ color = '#e04f4f'; shape='star'; size=22; }
+      else if(n.type === 'organization'){ color = '#8a6fd6'; shape='diamond'; }
+      else if(n.type === 'url'){ color = n.suspicious ? '#e04f4f' : '#5b8cff'; shape='triangle'; }
+      else if(n.type === 'domain'){ color = '#4a5568'; shape='dot'; size=10; }
+      else if(n.type === 'requested_action'){ color = '#3fa9bf'; shape='square'; }
+      else if(n.type === 'credential'){ color = '#e0793f'; shape='star'; }
+      return { id: n.id, label: n.label, color: {background:color, border:color}, shape, size, font };
+    });
+    const edges = graph.edges.map(e => ({ from: e.source, to: e.target, arrows: 'to', color: {color:'#2a3244', opacity:0.8} }));
+    const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+    const options = { physics: { stabilization: true, barnesHut: { gravitationalConstant: -4500, springLength: 120 } }, interaction: { hover: true } };
+    if(network) network.destroy();
+    network = new vis.Network(container, data, options);
+  }catch(e){
+    container.style.display = 'none'; graphError.style.display = 'block';
+    graphError.textContent = t('graph_error') + ' (' + e.message + ')';
+  }
+}
+
+function renderStageBreakdown(stageBreakdown){
+  const box = document.getElementById('stageBreakdown');
+  box.innerHTML = "";
+  stageBreakdown.forEach(entry => {
+    const color = STAGE_COLOR[entry.stage] || '#3a4256';
+    const div = document.createElement('div');
+    div.className = 'stagecard';
+    const evidenceText = entry.evidence.join(', ') || t('none_yet');
+    div.innerHTML = `
+      <div class="sc-head"><span class="sc-badge" style="background:${color}">${entry.stage_label}</span></div>
+      <div class="sc-row"><b>${t('evidence_label')}</b>${evidenceText.replace(/</g,'&lt;')}</div>
+      <div class="sc-row"><b>${t('why_it_matters')}</b>${entry.why_it_matters}</div>
+      <div class="sc-row"><b>${t('attacker_goal')}</b>${entry.attacker_goal}</div>
+    `;
+    box.appendChild(div);
+  });
+}
+
+function renderInference(inference){
+  document.getElementById('inferenceBox').innerHTML = inference.map(l => `<p>${l.replace(/</g,'&lt;')}</p>`).join('');
+}
+
+function renderResponse(resp){
+  document.getElementById('respWhatHappened').textContent = resp.what_happened;
+  document.getElementById('respWhyRisky').textContent = resp.why_risky;
+  const ol = document.getElementById('respWhatToDo');
+  ol.innerHTML = resp.what_to_do.map(item => `<li>${item.replace(/</g,'&lt;')}</li>`).join('');
+}
+
+function renderTable(perMsg){
+  const tbody = document.querySelector('#msgTable tbody');
+  tbody.innerHTML = "";
+  perMsg.forEach(pm => {
+    const tr = document.createElement('tr');
+    const color = STAGE_COLOR[pm.stage] || '#3a4256';
+    const reasons = pm.reasons.map(r => r.replace(/</g,'&lt;')).join(', ') || '—';
+    tr.innerHTML = `
+      <td>${pm.index+1}</td>
+      <td class="txt">${pm.raw_text.replace(/</g,'&lt;')}</td>
+      <td><span class="stagebadge" style="background:${color}">${STAGE_LABEL_STATIC[currentLang][pm.stage]}</span></td>
+      <td class="txt">${reasons}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function setLoading(isLoading, stepIdx){
+  const btn = document.getElementById('analyzeBtn');
+  const apiState = document.getElementById('apiState');
+  btn.disabled = isLoading;
+  apiState.className = isLoading ? 'working' : '';
+  if(isLoading){
+    const labels = [t('progress_1'), t('progress_2'), t('progress_3')];
+    apiState.innerHTML = '<span class="spinner"></span>' + (labels[stepIdx] || labels[0]);
+  } else {
+    apiState.innerHTML = '';
+  }
+}
+
+async function analyze(){
+  const messages = getMessages();
+  const apiState = document.getElementById('apiState');
+  if(messages.length === 0){
+    apiState.className = 'err'; apiState.textContent = t('error_no_messages');
+    return;
+  }
+
+  setPipelineStep(0);
+  setLoading(true, 0);
+  const progressTimer1 = setTimeout(() => setLoading(true, 1), 250);
+  const progressTimer2 = setTimeout(() => setLoading(true, 2), 500);
+
+  try{
+    const res = await fetch(`${getApiBase()}/analyze`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({messages, lang: currentLang})
+    });
+    let data;
+    try{ data = await res.json(); }
+    catch(parseErr){ throw new Error(`Backend returned a non-JSON response (HTTP ${res.status}).`); }
+
+    if(!res.ok){
+      const detail = data && data.detail ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)) : `HTTP ${res.status}`;
+      throw new Error(detail);
+    }
+
+    clearTimeout(progressTimer1); clearTimeout(progressTimer2);
+    setLoading(false);
+    lastResult = data;
+
+    const verdict = document.getElementById('verdict');
+    verdict.style.display = 'flex';
+    verdict.className = 'risk-' + data.risk_level;
+    document.getElementById('verdictLabel').textContent = data.verdict_label;
+    document.getElementById('riskTag').textContent = data.risk_level_label;
+
+    renderTable(data.per_message_stage);
+    renderEvidence(data.graph);
+    renderGraph(data.graph);
+    renderLadder(data.chain, data.stage_breakdown);
+    renderTimeline(data.timeline);
+    renderStageBreakdown(data.stage_breakdown);
+    renderInference(data.inference);
+    renderResponse(data.response);
+    setPipelineStep(6);
+  }catch(err){
+    clearTimeout(progressTimer1); clearTimeout(progressTimer2);
+    setLoading(false);
+    apiState.className = 'err';
+    apiState.textContent = t('could_not_analyze') + ' ' + err.message + ' (' + getApiBase() + ')';
+    setPipelineStep(0);
+  }
+}
+document.getElementById('analyzeBtn').onclick = analyze;
+
+// ---------- init ----------
+applyStaticTranslations('en');
+renderLegend();
+checkConnection();
+</script>
+</body>
+</html>

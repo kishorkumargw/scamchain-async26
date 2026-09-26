@@ -1,0 +1,9 @@
+{
+  "messages": [
+    "Dear customer, this is regarding your recent order.",
+    "We are from the courier company. Your parcel is held at customs due to unusual activity on your address.",
+    "Failure to respond within 2 hours will result in your parcel being returned. Pay a small customs fee immediately to release it.",
+    "Tap this link to pay the pending customs fee: http://parcel-customs-fee.tk/pay",
+    "Enter your card number and CVV to complete the payment."
+  ]
+}
