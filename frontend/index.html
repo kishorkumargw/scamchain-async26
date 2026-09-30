@@ -90,12 +90,33 @@
   .ladder{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:6px;}
   .ladder .stage{flex:1;min-width:110px;text-align:center;padding:10px 6px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);color:var(--ink-dim);font-size:11px;font-family:'JetBrains Mono',monospace;cursor:pointer;}
   .ladder .stage.active{color:#0a0d13;font-weight:600;}
-  .ladder .stage.selected{outline:2px solid var(--accent);}
+  .ladder .stage.selected{outline:2px solid var(--accent);box-shadow:0 0 0 3px rgba(91,140,255,0.12),0 8px 24px rgba(0,0,0,0.22);transform:translateY(-1px);}
+  .ladder .stage:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .ladder .stage::after{content:'Select';display:block;font-size:9px;opacity:0;margin-top:3px;}
+  .ladder .stage.active:hover::after,.ladder .stage.selected::after{opacity:.65;}
+  #stageDetail{scroll-margin-top:20px;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;}
+  #stageDetail.focused{border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,140,255,0.12);}
+  #stageDetail .stage-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.03em;margin-bottom:8px;}
   .ladder .arrow{color:var(--ink-dim);font-size:14px;flex:0;}
   #stageDetail{margin-top:12px;padding:12px 14px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);font-size:12.5px;line-height:1.7;}
   #stageDetail .row{margin-bottom:6px;} #stageDetail b{color:var(--ink);}
   #stageDetail .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
   #stageDetail .chip{background:#161b26;border:1px solid var(--panel-border);border-radius:12px;padding:2px 9px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+  .contrib-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .contrib-card{background:#0a0d13;border:1px solid var(--panel-border);border-radius:8px;padding:12px 14px;}
+  .contrib-card.turning{border-color:rgba(224,79,79,0.55);box-shadow:0 0 0 1px rgba(224,79,79,0.10);}
+  .contrib-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .contrib-title{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;}
+  .contrib-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:#161b26;color:var(--ink-dim);}
+  .contrib-badge.turning{color:#f1a0a0;border:1px solid rgba(224,79,79,0.45);}
+  .contrib-text{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);line-height:1.6;background:#0d1119;border:1px solid var(--panel-border);border-radius:6px;padding:8px 10px;margin-bottom:8px;}
+  .contrib-label{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-dim);margin-bottom:4px;}
+  .contrib-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .contrib-meta-box{background:#0d1119;border:1px solid var(--panel-border);border-radius:6px;padding:7px 9px;}
+  .contrib-value{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);}
+  .contrib-foot{margin-top:8px;font-size:10.5px;color:var(--ink-dim);line-height:1.5;}
+  @media(max-width:760px){.contrib-grid{grid-template-columns:1fr;}.contrib-meta{grid-template-columns:1fr;}}
 
   .timeline{position:relative;padding-left:22px;}
   .timeline::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--panel-border);}
@@ -110,9 +131,27 @@
 
   #graph{height:360px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);}
   #graphError{display:none;padding:14px;font-size:12.5px;color:var(--ink-dim);text-align:center;}
+  #graphDetail{margin-top:10px;padding:12px 14px;border-radius:8px;background:#0a0d13;border:1px solid var(--panel-border);font-size:12px;line-height:1.65;color:var(--ink-dim);}
+  #graphDetail b{color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;}
+  #graphDetail .gd-row{margin-bottom:7px;}
+  #graphDetail .gd-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  #graphDetail .gd-chip{background:#161b26;border:1px solid var(--panel-border);border-radius:12px;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink);}
 
   .evidence-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media (max-width:600px){.evidence-grid{grid-template-columns:1fr;}}
+  .evidence-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;}
+  .evidence-metric{background:#0a0d13;border:1px solid var(--panel-border);border-radius:7px;padding:9px 10px;}
+  .evidence-metric .em-value{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--ink);}
+  .evidence-metric .em-label{font-size:10px;color:var(--ink-dim);margin-top:3px;line-height:1.3;}
+  .url-evidence{margin-top:12px;padding-top:12px;border-top:1px solid var(--panel-border);}
+  .url-evidence h3{font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-dim);margin:0 0 8px;}
+  .url-evidence-card{background:#0a0d13;border:1px solid var(--panel-border);border-radius:7px;padding:10px 11px;margin-top:8px;}
+  .url-evidence-url{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);word-break:break-all;}
+  .url-evidence-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .url-evidence-chip{background:#161b26;border:1px solid var(--panel-border);border-radius:11px;padding:2px 7px;font-size:10px;color:var(--ink-dim);}
+  .url-evidence-chip.flagged{color:#f1a0a0;border-color:rgba(224,79,79,0.45);}
+  .url-evidence-note{font-size:10.5px;color:var(--ink-dim);margin-top:7px;line-height:1.45;}
+  @media(max-width:700px){.evidence-summary{grid-template-columns:1fr 1fr;}}
   .evidence-col h3{font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-dim);margin:0 0 8px;}
   .chip-list{display:flex;flex-direction:column;gap:6px;}
   .chip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0a0d13;border:1px solid var(--panel-border);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
@@ -238,6 +277,8 @@
           <div class="evidence-col"><h3 data-i18n="ev_actions">Requested actions</h3><div class="chip-list" id="evActions"></div></div>
           <div class="evidence-col"><h3 data-i18n="ev_creds">Credentials requested</h3><div class="chip-list" id="evCreds"></div></div>
         </div>
+        <div class="evidence-summary" id="evidenceSummary"></div>
+        <div class="url-evidence" id="urlEvidence"></div>
       </div>
 
       <div class="panel">
@@ -245,6 +286,7 @@
         <p class="hint" data-i18n="relationships_hint">How the sender, messages, entities and signals connect.</p>
         <div id="graph"></div>
         <div id="graphError" data-i18n="graph_error"></div>
+        <div id="graphDetail"><span class="empty-inline" data-i18n="graph_detail_hint">Click a relationship edge to inspect why the evidence is connected.</span></div>
       </div>
 
       <div class="panel">
@@ -258,6 +300,12 @@
         <h2><span class="stepno">04</span> <span data-i18n="timeline_heading">Attack timeline</span></h2>
         <p class="hint" data-i18n="timeline_hint">The same chain, message by message.</p>
         <div class="timeline" id="timelineBox"><span class="empty-inline">—</span></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="stepno">04</span> <span data-i18n="contribution_heading">Message contribution</span></h2>
+        <p class="hint" data-i18n="contribution_hint">Remove one message at a time to see whether the reconstructed attack state changes.</p>
+        <div id="contributionBox" class="contrib-grid"><span class="empty-inline">—</span></div>
       </div>
 
       <div class="panel">
@@ -403,33 +451,126 @@ function renderLadder(chain, stageBreakdown){
       arrow.className = 'arrow'; arrow.textContent = '→';
       ladder.appendChild(arrow);
     }
-    const el = document.createElement('div');
+    const el = document.createElement('button');
     const isActive = chain.includes(stage);
+    el.type = 'button';
     el.className = 'stage' + (isActive ? ' active' : '');
     if(isActive) el.style.background = STAGE_COLOR[stage];
     el.textContent = STAGE_LABEL_STATIC[currentLang][stage];
     el.dataset.stage = stage;
+    el.setAttribute('aria-label', `${STAGE_LABEL_STATIC[currentLang][stage]}: ${t('select_stage_hint')}`);
     if(isActive){
-      el.onclick = () => selectStage(stage, stageBreakdown);
+      el.onclick = () => selectStage(stage, stageBreakdown, true);
+    } else {
+      el.disabled = true;
     }
     ladder.appendChild(el);
   });
-  // auto-select the final (most severe) stage reached
-  if(chain.length) selectStage(chain[chain.length-1], stageBreakdown);
+  // Auto-select the final (most severe) stage reached, without moving the page.
+  if(chain.length) selectStage(chain[chain.length-1], stageBreakdown, false);
 }
 
-function selectStage(stage, stageBreakdown){
-  document.querySelectorAll('.ladder .stage').forEach(el => el.classList.toggle('selected', el.dataset.stage === stage));
+function highlightStageInGraph(stage){
+  if(!network || !window.scGraphData) return;
+  const stageNodeId = `stage:${stage}`;
+  const supportEdges = window.scGraphData.edges.filter(e => e.type === 'supports_stage' && e.target === stageNodeId);
+  const supportMessageIds = new Set(supportEdges.map(e => e.source));
+  const nodeUpdates = window.scGraphData.nodes.map(n => {
+    const isStage = n.id === stageNodeId;
+    const isSupportMessage = supportMessageIds.has(n.id);
+    const active = isStage || isSupportMessage;
+    const baseColor = STAGE_COLOR[n.stage] || (n.type === 'attacker' ? '#e04f4f' : '#3a4256');
+    return {
+      id: n.id,
+      opacity: active ? 1 : 0.28,
+      borderWidth: active ? 2.5 : 1,
+      color: {
+        background: n.type === 'stage' ? (isStage ? STAGE_COLOR[stage] : '#3a4256') : baseColor,
+        border: active ? '#e6e9f0' : baseColor,
+        opacity: active ? 1 : 0.28
+      }
+    };
+  });
+  const edgeUpdates = window.scGraphData.edges.map(e => {
+    const active = e.type === 'supports_stage' && e.target === stageNodeId;
+    const relActive = supportMessageIds.has(e.source) && e.target === stageNodeId;
+    return {
+      id: e.id,
+      width: active ? 3 : 1,
+      color: {color: active ? STAGE_COLOR[stage] : '#2a3244', opacity: active ? 1 : 0.16}
+    };
+  });
+  network.body.data.nodes.update(nodeUpdates);
+  network.body.data.edges.update(edgeUpdates);
+}
+
+function selectStage(stage, stageBreakdown, userInitiated=false){
+  document.querySelectorAll('.ladder .stage').forEach(el => {
+    const selected = el.dataset.stage === stage;
+    el.classList.toggle('selected', selected);
+    if(selected) el.setAttribute('aria-current','step');
+    else el.removeAttribute('aria-current');
+  });
   const entry = stageBreakdown.find(s => s.stage === stage);
   const box = document.getElementById('stageDetail');
-  if(!entry){ box.innerHTML = `<span class="empty-inline">${t('select_stage_hint')}</span>`; return; }
+  if(!entry){
+    box.classList.remove('focused');
+    box.innerHTML = `<span class="empty-inline">${t('select_stage_hint')}</span>`;
+    return;
+  }
   const chips = entry.evidence.map(e => `<span class="chip">${e.replace(/</g,'&lt;')}</span>`).join('') || `<span class="empty-inline">${t('none_yet')}</span>`;
   box.innerHTML = `
+    <div class="stage-title">${t('selected_stage')}: ${entry.stage_label}</div>
     <div class="row"><b>${t('evidence_label')}:</b></div>
     <div class="chips">${chips}</div>
     <div class="row" style="margin-top:10px;"><b>${t('why_it_matters')}:</b> ${entry.why_it_matters}</div>
     <div class="row"><b>${t('attacker_goal')}:</b> ${entry.attacker_goal}</div>
   `;
+  box.classList.remove('focused');
+  void box.offsetWidth;
+  box.classList.add('focused');
+  highlightStageInGraph(stage);
+  if(userInitiated){
+    box.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function renderContributions(contributions){
+  const box = document.getElementById('contributionBox');
+  box.innerHTML = "";
+  if(!contributions || !contributions.length){
+    box.innerHTML = `<span class="empty-inline">${t('none_yet')}</span>`;
+    return;
+  }
+  const stageLabel = stage => STAGE_LABEL_STATIC[currentLang][stage] || stage;
+  contributions.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'contrib-card' + (item.turning_point ? ' turning' : '');
+    const status = item.turning_point ? t('turning_point') : t('chain_unchanged');
+    const statusClass = item.turning_point ? ' turning' : '';
+    const added = (item.introduced_stages || []).map(stageLabel).join(' → ') || t('none_yet');
+    const messageStage = stageLabel(item.stage_with_message);
+    const fullChain = (item.full_chain || []).map(stageLabel).join(' → ') || '—';
+    const withoutChain = (item.chain_without_message || []).map(stageLabel).join(' → ') || '—';
+    const evidence = (item.evidence || []).map(e => `<span class="tl-chip">${String(e).replace(/</g,'&lt;')}</span>`).join('');
+    div.innerHTML = `
+      <div class="contrib-head">
+        <div class="contrib-title">${t('message_label')} ${item.message_number}</div>
+        <div class="contrib-badge${statusClass}">${status}</div>
+      </div>
+      <div class="contrib-text">${String(item.raw_text || '').replace(/</g,'&lt;')}</div>
+      <div class="contrib-meta">
+        <div class="contrib-meta-box"><div class="contrib-label">${t('message_supports')}</div><div class="contrib-value">${messageStage}</div></div>
+        <div class="contrib-meta-box"><div class="contrib-label">${t('without_message')}</div><div class="contrib-value">${stageLabel(item.max_stage_without_message)}</div></div>
+      </div>
+      <div class="contrib-foot"><b>${t('full_chain_label')}:</b> ${fullChain}</div>
+      <div class="contrib-foot"><b>${t('without_chain_label')}:</b> ${withoutChain}</div>
+      <div class="contrib-foot"><b>${t('introduced_stages')}:</b> ${added}</div>
+      <div class="contrib-foot"><b>${t('evidence_label')}:</b><div class="tl-chips">${evidence || `<span class="empty-inline">${t('none_yet')}</span>`}</div></div>
+      <div class="contrib-foot">${t('counterfactual_note')}</div>
+    `;
+    box.appendChild(div);
+  });
 }
 
 function renderTimeline(timeline){
@@ -450,7 +591,7 @@ function renderTimeline(timeline){
   });
 }
 
-function renderEvidence(graph){
+function renderEvidence(graph, summary){
   const orgs = graph.nodes.filter(n => n.type === 'organization');
   const urls = graph.nodes.filter(n => n.type === 'url');
   const actions = graph.nodes.filter(n => n.type === 'requested_action');
@@ -472,11 +613,45 @@ function renderEvidence(graph){
   fill('evUrls', urls, u => u.suspicious);
   fill('evActions', actions);
   fill('evCreds', creds);
+
+  const metric = (value, label) => `<div class="evidence-metric"><div class="em-value">${String(value).replace(/</g,'&lt;')}</div><div class="em-label">${label}</div></div>`;
+  const stageSupported = summary?.stages_supported_count ?? 0;
+  const stageTotal = summary?.stages_total ?? STAGE_ORDER.length;
+  document.getElementById('evidenceSummary').innerHTML = [
+    metric(`${stageSupported}/${stageTotal}`, t('stage_coverage')),
+    metric(summary?.signal_hit_count ?? 0, t('signal_hits')),
+    metric(summary?.relationship_count ?? 0, t('relationships_count')),
+    metric(summary?.entities_observed ?? 0, t('entities_observed')),
+  ].join('');
+
+  const urlBox = document.getElementById('urlEvidence');
+  const urlsWithEvidence = urls.filter(u => (u.indicators || []).length || u.suspicious);
+  urlBox.innerHTML = urlsWithEvidence.length ? `<h3>${t('url_evidence_heading')}</h3>` + urlsWithEvidence.map(u => {
+    const chips = (u.indicators || []).map(x => `<span class="url-evidence-chip flagged">${String(x).replace(/</g,'&lt;')}</span>`).join('');
+    return `<div class="url-evidence-card"><div class="url-evidence-url">${String(u.label || '').replace(/</g,'&lt;')}</div><div class="url-evidence-meta">${chips || `<span class="url-evidence-chip">${t('no_url_indicators')}</span>`}</div><div class="url-evidence-note">${String(u.assessment || '').replace(/</g,'&lt;')}.</div></div>`;
+  }).join('') : '';
+}
+
+function renderGraphDetail(edge){
+  const box = document.getElementById('graphDetail');
+  if(!edge){
+    box.innerHTML = `<span class="empty-inline">${t('graph_detail_hint')}</span>`;
+    return;
+  }
+  const labels = {relationship:t('graph_relationship'), supports_stage:t('graph_stage_support')};
+  const relTypes = (edge.relationship_types || []).map(x => x.replaceAll('_',' ')).join(' · ');
+  const evidence = (edge.evidence || []).map(e => `<span class="gd-chip">${String(e).replace(/</g,'&lt;')}</span>`).join('');
+  box.innerHTML = `
+    <div class="gd-row"><b>${labels[edge.type] || edge.type}</b>${relTypes ? ` <span>${relTypes}</span>` : ''}</div>
+    <div class="gd-row"><b>${t('graph_why_connected')}</b><br>${String(edge.reason || edge.label || '—').replace(/</g,'&lt;')}</div>
+    <div class="gd-row"><b>${t('graph_strength')}</b> ${String(edge.strength || '—').replace(/</g,'&lt;')}</div>
+    <div class="gd-row"><b>${t('graph_evidence')}</b><div class="gd-chips">${evidence || `<span class="empty-inline">${t('none_yet')}</span>`}</div></div>`;
 }
 
 function renderGraph(graph){
   const graphError = document.getElementById('graphError');
   const container = document.getElementById('graph');
+  renderGraphDetail(null);
   if(typeof vis === 'undefined'){
     container.style.display = 'none'; graphError.style.display = 'block';
     return;
@@ -486,19 +661,37 @@ function renderGraph(graph){
     const nodes = graph.nodes.map(n => {
       let color = '#3a4256', shape='dot', size=14, font={color:'#e6e9f0', size:11, face:'JetBrains Mono'};
       if(n.type === 'message'){ color = STAGE_COLOR[n.stage] || '#5b7fa6'; shape='box'; size=18; font.color = '#0a0d13'; }
+      else if(n.type === 'stage'){ color = STAGE_COLOR[n.stage] || '#5b7fa6'; shape='hexagon'; size=22; font.color = '#0a0d13'; }
       else if(n.type === 'attacker'){ color = '#e04f4f'; shape='star'; size=22; }
       else if(n.type === 'organization'){ color = '#8a6fd6'; shape='diamond'; }
       else if(n.type === 'url'){ color = n.suspicious ? '#e04f4f' : '#5b8cff'; shape='triangle'; }
       else if(n.type === 'domain'){ color = '#4a5568'; shape='dot'; size=10; }
       else if(n.type === 'requested_action'){ color = '#3fa9bf'; shape='square'; }
       else if(n.type === 'credential'){ color = '#e0793f'; shape='star'; }
-      return { id: n.id, label: n.label, color: {background:color, border:color}, shape, size, font };
+      return { id: n.id, label: n.label, title: n.type === 'message' ? n.text : n.label, color: {background:color, border:color}, shape, size, font };
     });
-    const edges = graph.edges.map(e => ({ from: e.source, to: e.target, arrows: 'to', color: {color:'#2a3244', opacity:0.8} }));
+    const edges = graph.edges.map((e, i) => ({
+      id: e.id || `edge:${i}`,
+      from: e.source, to: e.target, arrows: 'to',
+      label: e.type === 'relationship' ? 'connects' : (e.type === 'supports_stage' ? 'supports' : ''),
+      title: e.reason ? `${e.reason}\nEvidence: ${(e.evidence || []).join(', ') || 'none'}` : (e.label || e.type),
+      color: {color: e.type === 'relationship' ? '#5b8cff' : '#2a3244', opacity:0.82},
+      font: {color:'#8b93a7', size:9, face:'JetBrains Mono', align:'middle'}
+    }));
+    window.scGraphData = {nodes: graph.nodes, edges: graph.edges};
     const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
-    const options = { physics: { stabilization: true, barnesHut: { gravitationalConstant: -4500, springLength: 120 } }, interaction: { hover: true } };
+    const options = {
+      physics: { stabilization: true, barnesHut: { gravitationalConstant: -4500, springLength: 120 } },
+      interaction: { hover: true, navigationButtons: true, keyboard: true }
+    };
     if(network) network.destroy();
     network = new vis.Network(container, data, options);
+    network.on('selectEdge', params => {
+      const selectedId = params.edges && params.edges.length ? params.edges[0] : null;
+      const edge = graph.edges.find(e => (e.id || '') === selectedId) || graph.edges.find((e, i) => `edge:${i}` === selectedId);
+      renderGraphDetail(edge || null);
+    });
+    network.on('deselectEdge', () => renderGraphDetail(null));
   }catch(e){
     container.style.display = 'none'; graphError.style.display = 'block';
     graphError.textContent = t('graph_error') + ' (' + e.message + ')';
@@ -601,10 +794,11 @@ async function analyze(){
     document.getElementById('riskTag').textContent = data.risk_level_label;
 
     renderTable(data.per_message_stage);
-    renderEvidence(data.graph);
+    renderEvidence(data.graph, data.evidence_summary);
     renderGraph(data.graph);
     renderLadder(data.chain, data.stage_breakdown);
     renderTimeline(data.timeline);
+    renderContributions(data.message_contributions);
     renderStageBreakdown(data.stage_breakdown);
     renderInference(data.inference);
     renderResponse(data.response);

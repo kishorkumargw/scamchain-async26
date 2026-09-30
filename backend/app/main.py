@@ -79,7 +79,13 @@ def analyze(req: AnalyzeRequest):
     try:
         extracted = extract_all(req.messages)                                    # steps 1-3 (language-independent)
         chain_result = build_chain(extracted)                                     # steps 4 & 6-7 (language-independent)
-        graph = build_evidence_graph(extracted, chain_result["per_message_stage"], lang=lang)  # step 5
+        graph = build_evidence_graph(
+            extracted,
+            chain_result["per_message_stage"],
+            lang=lang,
+            stage_evidence=chain_result["stage_evidence"],
+            relationships=chain_result["relationships"],
+        )  # step 5
         story = build_threat_story(extracted, chain_result, lang=lang)            # steps 8-9 (localized)
 
         if req.use_ai_narrative:
@@ -109,6 +115,9 @@ def analyze(req: AnalyzeRequest):
         response=story["response"],
         chain=chain_result["chain"],
         per_message_stage=chain_result["per_message_stage"],
+        relationships=chain_result["relationships"],
+        message_contributions=chain_result["message_contributions"],
+        evidence_summary=chain_result["evidence_summary"],
         graph=graph,
         timeline=story["timeline"],
     )

@@ -11,12 +11,11 @@ model: it is fast, dependency-light, fully explainable (every signal traces
 back to a concrete keyword/pattern match), and works with zero external API
 calls, which matters for a live demo.
 
-IMPORTANT (language note): these lexicons are English-keyword-based. Demo
-scenario messages are written in English on purpose - that is what this
-detector actually understands. The Kannada UI mode (see i18n.py) localizes
-the PRESENTATION of results, not the underlying scam text being analyzed.
-See README.md "Limitations" for why, and what a real Kannada-input
-detector would additionally need.
+LANGUAGE NOTE: the detector supports English plus a focused Kannada fraud lexicon
+for common bank/account social-engineering cues. The Kannada coverage is intentionally
+small and explainable rather than pretending to be full Kannada NLP. The original
+message is always preserved as evidence, and mixed Kannada-English messages can still
+trigger the shared signal families.
 
 One general lexicon covers every demo scenario (bank, UPI, fake customer
 care, digital arrest, job offer, electricity, courier, loan, investment) -
@@ -27,6 +26,7 @@ attack-chain reconstructor rather than nine hardcoded detectors.
 """
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from typing import List, Dict
 from urllib.parse import urlparse
@@ -72,6 +72,66 @@ REDIRECT_CUES = [
     r"\bapprove the (payment |collect )?request\b", r"\bclick to accept\b",
 ]
 
+# --------------------------------------------------------------------------
+# Focused Kannada cues for common social-engineering / bank fraud language.
+# These are deliberately phrase-based and auditable: each match can be shown
+# as evidence in the same graph/stage pipeline as English cues.
+# --------------------------------------------------------------------------
+
+KANNADA_IMPERSONATION_CUES = [
+    r"ಬ್ಯಾಂಕ್[‌‍\s-]*(?:ನಿಂದ|ಅಧಿಕಾರಿ|ಸಿಬ್ಬಂದಿ|ಕಸ್ಟಮರ್|ಗ್ರಾಹಕ)",
+    r"(?:ನಿಮ್ಮ\s*)?(?:ಬ್ಯಾಂಕ್|ಖಾತೆ|ಗ್ರಾಹಕ ಸೇವೆ)[^\n]{0,25}(?:ನಾವು|ನಾನು|ಅಧಿಕಾರಿ|ಸಿಬ್ಬಂದಿ)",
+    r"ಗ್ರಾಹಕ\s*ಸೇವೆ",
+    r"ಬ್ಯಾಂಕ್\s*ಅಧಿಕಾರಿ",
+    r"ಸೈಬರ್\s*ಕ್ರೈಂ",
+    r"ಪೊಲೀಸ್",
+    r"ಆದಾಯ ತೆರಿಗೆ",
+    r"ಆರ್\.?ಬಿ\.?ಐ",
+    r"ಕೂರಿಯರ್",
+    r"ವಿದ್ಯುತ್\s*(?:ಇಲಾಖೆ|ಮಂಡಳಿ)",
+]
+
+KANNADA_URGENCY_CUES = [
+    r"ತಕ್ಷಣ", r"ತುರ್ತು", r"ಈಗಲೇ", r"ಇಂದು",
+    r"ಖಾತೆ[^\n]{0,20}(?:ನಿಲ್ಲಿಸಲಾಗುತ್ತದೆ|ಮುಚ್ಚಲಾಗುತ್ತದೆ|ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ|ಬ್ಲಾಕ್)",
+    r"ಖಾತೆ[^\n]{0,20}(?:ಅಮಾನತು|ನಿಷ್ಕ್ರಿಯ)",
+    r"೨೪\s*ಗಂಟೆ", r"24\s*ಗಂಟೆ",
+    r"ಕೊನೆಯ\s*(?:ಎಚ್ಚರಿಕೆ|ಅವಕಾಶ)",
+    r"ದಂಡ", r"ಕ್ರಮ\s*ಕೈಗೊಳ್ಳಲಾಗುತ್ತದೆ",
+]
+
+KANNADA_REDIRECT_CUES = [
+    r"ಲಿಂಕ್\s*(?:ಮೇಲೆ|ಕೆಳಗೆ)?\s*ಕ್ಲಿಕ್\s*ಮಾಡಿ",
+    r"ಇಲ್ಲಿ\s*ಕ್ಲಿಕ್\s*ಮಾಡಿ",
+    r"ಲಿಂಕ್\s*ತೆರೆಯಿರಿ",
+    r"ವೆಬ್\s*(?:ಸೈಟ್|ಪುಟ)\s*ತೆರೆಯಿರಿ",
+    r"ಆ್ಯಪ್\s*ಡೌನ್\s*ಲೋಡ್\s*ಮಾಡಿ",
+    r"ಪರಿಶೀಲನೆ\s*ಗಾಗಿ\s*ಲಿಂಕ್",
+    r"ಖಾತೆ\s*(?:ಪರಿಶೀಲಿಸಿ|ಪರಿಶೀಲನೆ\s*ಮಾಡಿ)",
+    r"ವಿವರಗಳನ್ನು\s*ಪರಿಶೀಲಿಸಿ",
+]
+
+KANNADA_CREDENTIAL_TERMS = [
+    (r"ಒಟಿಪಿ", "OTP"),
+    (r"ಒ\.?\s*ಟಿ\.?\s*ಪಿ", "OTP"),
+    (r"ಒನ್[-\s]*ಟೈಮ್\s*ಪಾಸ್?ವರ್ಡ್", "OTP"),
+    (r"ಪಿನ್", "PIN"),
+    (r"ಸಿವಿವಿ|ಸಿ\.?ವಿ\.?ವಿ", "CVV"),
+    (r"ಪಾಸ್?ವರ್ಡ್", "Password"),
+    (r"ಕಾರ್ಡ್\s*(?:ಸಂಖ್ಯೆ|ನಂಬರ್)", "Card number"),
+    (r"ಖಾತೆ\s*(?:ಸಂಖ್ಯೆ|ನಂಬರ್)", "Account number"),
+    (r"ಯುಪಿಐ\s*ಪಿನ್|ಯು\.?ಪಿ\.?ಐ\s*ಪಿನ್", "UPI PIN"),
+]
+
+KANNADA_EXTRACTION_ACTION_CUES = [
+    r"ಒಟಿಪಿ[^\n]{0,20}(?:ನೀಡಿ|ಹೇಳಿ|ನಮೂದಿಸಿ)",
+    r"ಪಿನ್[^\n]{0,20}(?:ನೀಡಿ|ಹೇಳಿ|ನಮೂದಿಸಿ)",
+    r"ಪಾಸ್?ವರ್ಡ್[^\n]{0,20}(?:ನೀಡಿ|ಹೇಳಿ|ನಮೂದಿಸಿ)",
+    r"ಕಾರ್ಡ್[^\n]{0,20}(?:ಸಂಖ್ಯೆ|ನಂಬರ್)[^\n]{0,20}(?:ನೀಡಿ|ಹೇಳಿ|ನಮೂದಿಸಿ)",
+    r"ಹಣ\s*(?:ಕಳುಹಿಸಿ|ವರ್ಗಾಯಿಸಿ)",
+    r"ಪಾವತಿ\s*(?:ಮಾಡಿ|ಕಳುಹಿಸಿ)",
+]
+
 # Credential-type NOUNS - the actual sensitive data an attacker wants.
 # Kept separate from the verb phrases below so we can surface clean entity
 # labels like "OTP" / "CVV" instead of raw regex matches. The label is a
@@ -89,6 +149,8 @@ CREDENTIAL_TERMS = [
     (r"\bsocial security\b", "Social Security number"),
 ]
 
+CREDENTIAL_TERMS_ALL = CREDENTIAL_TERMS + KANNADA_CREDENTIAL_TERMS
+
 # Verb/demand phrases that signal an extraction attempt even without (or
 # alongside) an explicit credential noun in the same message.
 EXTRACTION_ACTION_CUES = [
@@ -98,7 +160,7 @@ EXTRACTION_ACTION_CUES = [
     r"\bcollect request\b", r"\bpayment request\b",
 ]
 
-EXTRACTION_CUES = [t[0] for t in CREDENTIAL_TERMS] + EXTRACTION_ACTION_CUES
+EXTRACTION_CUES = [t[0] for t in CREDENTIAL_TERMS_ALL] + EXTRACTION_ACTION_CUES + KANNADA_EXTRACTION_ACTION_CUES
 
 GENERIC_GREETING_CUES = [
     r"\bdear (customer|user|sir/madam|valued customer)\b", r"^hi[,!.]?\s*$",
@@ -137,6 +199,43 @@ class ExtractedMessage:
     credentials_requested: List[str] = field(default_factory=list)  # canonical keys, e.g. ["OTP"]
     requested_actions: List[Dict] = field(default_factory=list)      # structured, e.g. [{"kind":"provide_credential","credential":"OTP"}]
     signal_score: Dict[str, int] = field(default_factory=dict)    # signal_type -> count
+    url_evidence: List[Dict] = field(default_factory=list)        # per-URL explainable indicators
+
+
+def _normalize_for_matching(text: str) -> str:
+    """Normalize common scam-message obfuscation for rule matching only.
+
+    The original message is preserved in ``raw_text``. This matching form
+    handles Unicode variants, case, repeated whitespace/punctuation, and
+    common spacing/punctuation tricks such as ``O.T.P`` or ``O T P`` without
+    requiring an external NLP service.
+    """
+    normalized = unicodedata.normalize("NFKC", text)
+    normalized = normalized.casefold()
+
+    # Targeted canonicalization of common security terms. We intentionally
+    # avoid global leetspeak conversion because that can create false matches
+    # in ordinary prose.
+    patterns = {
+        r"\bo[\s._-]*t[\s._-]*p\b": "otp",
+        r"\bp[\s._-]*i[\s._-]*n\b": "pin",
+        r"\bc[\s._-]*v[\s._-]*v\b": "cvv",
+        r"\bu[\s._-]*p[\s._-]*i[\s._-]*p[\s._-]*i[\s._-]*n\b": "upi pin",
+        r"\bp[\s._-]*a[\s._-]*s[\s._-]*s[\s._-]*w[\s._-]*o[\s._-]*r[\s._-]*d\b": "password",
+        r"\bc[\s._-]*l[\s._-]*i[\s._-]*c[\s._-]*k\b": "click",
+        r"\bv[\s._-]*e[\s._-]*r[\s._-]*i[\s._-]*f[\s._-]*y\b": "verify",
+        r"\be[\s._-]*n[\s._-]*t[\s._-]*e[\s._-]*r\b": "enter",
+        r"\bp[\s._-]*r[\s._-]*o[\s._-]*v[\s._-]*i[\s._-]*d[\s._-]*e\b": "provide",
+    }
+    for pattern, replacement in patterns.items():
+        normalized = re.sub(pattern, replacement, normalized)
+
+    # Replace punctuation with spaces while preserving Unicode combining marks
+    # used by Kannada and other Indic scripts. A broad ``[^\w]`` filter
+    # would destroy vowel signs and make Kannada words impossible to match.
+    normalized = "".join(" " if unicodedata.category(ch).startswith("P") else ch for ch in normalized)
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return normalized
 
 
 def _find_all(cues: List[str], text_lower: str) -> List[str]:
@@ -182,6 +281,9 @@ def _derive_requested_actions(text_lower: str, em_signals: Dict[str, List[str]],
     if re.search(r"\b(send money|transfer)\b", text_lower) and not any(a["kind"] == "pay_fee" for a in actions):
         actions.append({"kind": "send_money"})
 
+    if re.search(r"(?:ಹಣ\s*(?:ಕಳುಹಿಸಿ|ವರ್ಗಾಯಿಸಿ)|ಪಾವತಿ\s*(?:ಮಾಡಿ|ಕಳುಹಿಸಿ))", text_lower):
+        actions.append({"kind": "send_money"})
+
     # dedupe while preserving order (dicts aren't hashable, so key on a tuple)
     seen = set()
     deduped = []
@@ -193,14 +295,37 @@ def _derive_requested_actions(text_lower: str, em_signals: Dict[str, List[str]],
     return deduped
 
 
+URL_EVIDENCE_RULES = [
+    ("shortener", re.compile(r"(?:bit\.ly|tinyurl\.com|t\.co|goo\.gl)", re.IGNORECASE), "URL shortener"),
+    ("ip_address", re.compile(r"^(?:https?://)?(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::\d+)?(?:/|$)", re.IGNORECASE), "IP address used as destination"),
+    ("unusual_tld", re.compile(r"\.(?:xyz|tk|ru|info|biz)(?:$|/)", re.IGNORECASE), "Unusual or high-risk TLD"),
+    ("verification_wording", re.compile(r"(?:verify|verification|login|signin|sign-in|account|secure|security)", re.IGNORECASE), "Verification/login wording in URL"),
+    ("http_only", re.compile(r"^http://", re.IGNORECASE), "URL does not use HTTPS"),
+    ("brand_like_path", re.compile(r"(?:bank|upi|payment|support|refund|kyc|customer-care|customer_support)", re.IGNORECASE), "Brand/service wording in URL path"),
+]
+
+def _analyze_url(url: str, suspicious: bool) -> Dict:
+    indicators = []
+    codes = []
+    for code, pattern, label in URL_EVIDENCE_RULES:
+        if pattern.search(url):
+            codes.append(code)
+            indicators.append(label)
+    return {
+        "url": url,
+        "indicators": indicators,
+        "indicator_codes": codes,
+        "assessment": "suspicious indicators detected" if suspicious or indicators else "no local suspicious indicators detected",
+    }
+
 def extract_message(index: int, text: str) -> ExtractedMessage:
-    text_lower = text.lower()
+    text_lower = _normalize_for_matching(text)
     em = ExtractedMessage(index=index, raw_text=text)
 
     signal_map = {
-        "impersonation": _find_all(IMPERSONATION_CUES, text_lower),
-        "urgency": _find_all(URGENCY_CUES, text_lower),
-        "redirect": _find_all(REDIRECT_CUES, text_lower),
+        "impersonation": _find_all(IMPERSONATION_CUES, text_lower) + _find_all(KANNADA_IMPERSONATION_CUES, text_lower),
+        "urgency": _find_all(URGENCY_CUES, text_lower) + _find_all(KANNADA_URGENCY_CUES, text_lower),
+        "redirect": _find_all(REDIRECT_CUES, text_lower) + _find_all(KANNADA_REDIRECT_CUES, text_lower),
         "extraction": _find_all(EXTRACTION_CUES, text_lower),
         "generic_greeting": _find_all(GENERIC_GREETING_CUES, text_lower),
     }
@@ -214,14 +339,19 @@ def extract_message(index: int, text: str) -> ExtractedMessage:
         u for u in em.urls
         if any(re.search(h, u, re.IGNORECASE) for h in SUSPICIOUS_URL_HINTS)
     ]
+    em.url_evidence = [_analyze_url(u, u in em.suspicious_urls) for u in em.urls]
     em.domains = list(dict.fromkeys(_extract_domain(u) for u in em.urls))
 
     # Organizations (very lightweight keyword spotting)
-    em.organizations = [kw for kw in ORG_KEYWORDS if kw in text_lower]
+    org_hits = [kw for kw in ORG_KEYWORDS if kw in text_lower]
+    for kw in ["ಬ್ಯಾಂಕ್", "ಗ್ರಾಹಕ ಸೇವೆ", "ಸೈಬರ್ ಕ್ರೈಂ", "ಪೊಲೀಸ್", "ವಿದ್ಯುತ್ ಇಲಾಖೆ", "ಆದಾಯ ತೆರಿಗೆ", "ಕೂರಿಯರ್"]:
+        if kw in text_lower:
+            org_hits.append(kw)
+    em.organizations = list(dict.fromkeys(org_hits))
 
     # Credential entities (normalized labels, deduped)
     creds = []
-    for pattern, label in CREDENTIAL_TERMS:
+    for pattern, label in CREDENTIAL_TERMS_ALL:
         if re.search(pattern, text_lower):
             creds.append(label)
     em.credentials_requested = list(dict.fromkeys(creds))

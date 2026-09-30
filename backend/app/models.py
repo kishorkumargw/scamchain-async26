@@ -35,5 +35,8 @@ class AnalyzeResponse(BaseModel):
     response: dict
     chain: List[str]
     per_message_stage: List[dict]
+    relationships: List[dict]
+    message_contributions: List[dict]
+    evidence_summary: dict
     graph: dict
     timeline: List[dict]
