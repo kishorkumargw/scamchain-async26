@@ -9,6 +9,26 @@ ScamChain is an explainable **social-engineering attack-chain reconstruction** M
 ![Status](https://img.shields.io/badge/Status-Hackathon%20MVP-orange)
 
 > **Multiple Signals → Evidence → Relationships → Evidence Graph → Attack Chain → Explanation → Defensive Response**
+## Demo Screenshots
+
+### 1. Analysis Dashboard
+
+The main ScamChain dashboard shows the submitted messages, detected signals, risk verdict, and attack-chain evidence coverage.
+
+![ScamChain Analysis Dashboard](docs/screenshots/01-analysis-dashboard.png)
+
+### 2. Evidence Graph & Attack Chain
+
+The evidence graph connects messages, entities, URLs, requested actions, and credentials to reconstruct the social-engineering attack chain.
+
+![ScamChain Evidence Graph](docs/screenshots/02-evidence-graph.png)
+
+### 3. Explanation & Defensive Response
+
+ScamChain explains how the signals connect, why the conversation is risky, and what defensive action should be taken.
+
+![ScamChain Defensive Response](docs/screenshots/03-defensive-response.png)
+
 
 ## 2. Submission mode
 
