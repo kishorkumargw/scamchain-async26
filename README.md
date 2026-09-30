@@ -4,6 +4,10 @@
 
 ScamChain is an explainable **social-engineering attack-chain reconstruction** MVP. It does not simply classify one message as scam/safe. Instead it connects multiple signals, turns them into structured evidence, builds an evidence graph, reconstructs an attack chain, explains the reasoning, and gives a defensive response.
 
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Hackathon%20MVP-orange)
+
 > **Multiple Signals → Evidence → Relationships → Evidence Graph → Attack Chain → Explanation → Defensive Response**
 
 ## 2. Submission mode
@@ -22,7 +26,7 @@ ScamChain produces:
 
 `Multiple signals → relationships → evidence graph → attack chain → explanation → defensive response`
 
-The UI makes all six pipeline stages visible so judges can trace the result from raw input to the final response.
+The UI makes the core pipeline visible from signal extraction through evidence, relationships/evidence graph, attack-chain reconstruction, explanation, and defensive response.
 
 ## 4. How it works
 
@@ -38,7 +42,7 @@ flowchart LR
 ```
 
 1. **Extraction** (`extractor.py`) identifies suspicious cues, URLs/domains, claimed organizations, requested actions, and credentials.
-2. **Stage classification** (`chain_classifier.py`) scores each message against five attack stages and records the evidence contributing to each stage.
+2. **Stage classification** (`chain_classifier.py`) maps each message to the furthest attack stage supported by its detected evidence.
 3. **Evidence graph** (`graph_builder.py`) connects attacker/sender, messages, organizations, URLs/domains, requested actions, and credentials.
 4. **Explanation** (`explainer.py`) separates concrete evidence from inference and generates stage-by-stage reasoning, risk level, and defensive guidance.
 5. **Presentation** (`i18n.py` + `frontend/i18n.js`) renders the same analysis in English or Kannada.
@@ -168,6 +172,22 @@ LICENSE
 README.md
 SUBMISSION_CHECKLIST.md
 ```
+## Prerequisites
+
+- Python 3.11 or later
+- A modern web browser
+- No GPU required
+- No Node.js installation required for the current frontend
+- No external API key required
+- No external AI service required
+
+## Environment Variables
+
+The final ScamChain MVP does not require any environment variables, API keys, or external AI services.
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| None | No | — | The submitted core pipeline runs locally without external configuration. |
 
 ## 10. How to run locally
 
@@ -191,6 +211,43 @@ python -m http.server 5500
 Then open `http://127.0.0.1:5500`.
 
 No API key is required.
+## API Documentation
+
+The ScamChain backend is implemented with FastAPI.
+
+When the backend is running:
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+- Health check: `http://127.0.0.1:8000/health`
+
+## API Usage Example
+
+Send a `POST` request to:
+
+`http://127.0.0.1:8000/analyze`
+
+Example request:
+
+```json
+{
+  "messages": [
+    "Hi, I am from your bank.",
+    "There is an urgent problem with your account.",
+    "Click this link to verify your account: http://secure-bankverify.xyz/login",
+    "Please enter your OTP to complete verification."
+  ],
+  "lang": "en"
+}
+```
+
+The response contains the extracted signals, entities, relationships, evidence graph data, attack-chain analysis, explanation, and defensive response.
+
+### Main API endpoint
+
+`POST /analyze`
+
+The `/analyze` endpoint accepts the submitted scam messages and returns the extracted signals, entities, relationships, evidence graph data, attack-chain analysis, explanation, and defensive response.
 
 ## 11. Demo flow for judges
 
@@ -216,7 +273,73 @@ CONTACT
 → REDIRECT
 → EXTRACTION
 ```
+## Benchmark & Maturity
 
+### Synthetic Benchmark
+
+ScamChain includes a local synthetic benchmark covering suspicious and benign cases, including English, Kannada, and obfuscated-message cases.
+
+Latest recorded benchmark results:
+
+| Metric | Result |
+|---|---:|
+| Suspicious-case pass rate | 100% |
+| Required-signal recall | 100% |
+| Average chain completeness | 100% |
+| Benign false-positive rate | 0% |
+| Kannada case pass rate | 100% |
+| Obfuscation case pass rate | 100% |
+
+These results come from a small synthetic engineering benchmark and should not be interpreted as real-world accuracy or production performance.
+
+### Maturity Status
+
+**Hackathon MVP / Prototype**
+
+ScamChain is designed for hackathon demonstration, research, and security-awareness use. It is not a production-grade cybersecurity platform.
+
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| `uvicorn` is not recognized | Run `python -m uvicorn app.main:app --reload --port 8000` from the `backend` folder. |
+| Backend does not start | Make sure Python 3.11+ is installed and run `python -m pip install -r requirements.txt`. |
+| Frontend cannot connect to the backend | Confirm the backend is running on `http://127.0.0.1:8000` before opening the frontend. |
+| Frontend page does not load | Run `python -m http.server 5500` from the `frontend` folder and open `http://127.0.0.1:5500`. |
+| Graph is not displayed | Refresh the page after confirming that the backend returned a successful analysis response. |
+| API documentation is unavailable | Start the backend first, then open `http://127.0.0.1:8000/docs`. |
+
+## Known Limitations
+
+- The current MVP uses deterministic NLP and rule-based evidence extraction rather than a trained machine-learning model.
+- The benchmark is synthetic and does not represent real-world detection accuracy.
+- The current attack-chain model focuses on the five defined social-engineering stages.
+- URL and message analysis is performed on the data supplied to the application; the MVP does not depend on a live threat-intelligence feed.
+
+## Security Reporting
+
+ScamChain is a hackathon MVP and is not intended for production security operations.
+
+To report a security issue in the project, please open a GitHub issue in the repository with a clear description of the problem and steps to reproduce it. Do not include real passwords, OTPs, financial information, or other sensitive personal data.
+
+## Contributing
+
+Contributions and improvements are welcome.
+
+### Code Style
+
+- Keep the code simple, readable, and modular.
+- Preserve the explainability of signal detection and attack-chain reconstruction.
+- Avoid adding external services or API dependencies without documenting them.
+- Update the README when changes affect setup, usage, architecture, or evaluation.
+- Test the local application before submitting changes.
+
+## License
+
+ScamChain is released under the MIT License. See the `LICENSE` file for details.
+
+## 5. Attack stages## 
 The included synthetic evaluation suite covers 28 cases: 20 suspicious and 8 benign, plus Kannada and obfuscation cases. The latest recorded run reports:
 
 - 100% synthetic suspicious-case pass rate
