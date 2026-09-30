@@ -176,4 +176,10 @@ The included scenarios are fictional security-awareness examples. They do not co
 
 ## Reproducibility / disclosure
 
-Please disclose any pre-existing project code or other prior work in the final submission description/README as required by the hackathon rules. This repository should be submitted under the included open-source license.
+ScamChain was developed for ASYNC’26 by Team DECODERS.
+
+The initial project concept and baseline prototype were developed before the final hackathon build phase. During the hackathon, the team extended and refined the project substantially, including the explainable evidence graph, attack-chain reconstruction, false-positive handling, Kannada support, evaluation suite, defensive response flow, and final offline demo hardening.
+
+All code included in this repository is submitted under the open-source license included in this repository.
+
+The repository is intended to provide judges with sufficient documentation and source code to understand and reproduce the core ScamChain functionality.
