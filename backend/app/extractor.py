@@ -38,7 +38,7 @@ from urllib.parse import urlparse
 # --------------------------------------------------------------------------
 
 IMPERSONATION_CUES = [
-    r"\bfrom your bank\b", r"\bofficial\b", r"\bsupport team\b",
+    r"\bfrom your bank\b", r"\bsupport team\b",
     r"\bcustomer (service|care)\b", r"\bthis is\s+\w+\s+(bank|support|security|team)\b",
     r"\bwe are from\b", r"\bi(?:'m| am) from\b", r"\bgovernment\b", r"\bincome tax\b",
     r"\brbi\b", r"\bcyber ?crime (cell|department)\b", r"\bcourier (service|company)\b",
@@ -64,13 +64,26 @@ URGENCY_CUES = [
 ]
 
 REDIRECT_CUES = [
-    r"\bclick (this|the|here)\b", r"\bclick here\b", r"\bfollow this link\b",
+    # Generic click wording is only treated as a redirect when it is tied to
+    # a security/account/link/payment context. This prevents benign phrases
+    # such as "click the company portal to view the agenda" from becoming a
+    # suspicious redirect signal.
+    r"\bclick\b.{0,45}\b(?:link|verify|verification|login|signin|sign-in|account|identity|details|payment|refund|security)\b",
+    r"\b(?:link|verify|verification|login|signin|sign-in|account|identity|details|payment|refund|security)\b.{0,45}\bclick\b",
+    r"\bfollow this link\b",
     r"\bvisit (this|the) (site|link|page)\b", r"\btap (this|the) link\b",
     r"\bdownload (this|the) (app|file|attachment)\b",
     r"\bverify your (account|identity|details)\b", r"\bconfirm your (details|identity)\b",
     r"\bjoin this (whatsapp )?group\b", r"\binstall this app\b", r"\bdownload the loan app\b",
     r"\bapprove the (payment |collect )?request\b", r"\bclick to accept\b",
 ]
+
+# Mixed-language patterns where English words are embedded in Kannada text.
+MIXED_LANGUAGE_REDIRECT_CUES = [
+    r"\blink\b.{0,20}\bclick\b",
+    r"\bclick\b.{0,20}\blink\b",
+]
+
 
 # --------------------------------------------------------------------------
 # Focused Kannada cues for common social-engineering / bank fraud language.
@@ -325,7 +338,11 @@ def extract_message(index: int, text: str) -> ExtractedMessage:
     signal_map = {
         "impersonation": _find_all(IMPERSONATION_CUES, text_lower) + _find_all(KANNADA_IMPERSONATION_CUES, text_lower),
         "urgency": _find_all(URGENCY_CUES, text_lower) + _find_all(KANNADA_URGENCY_CUES, text_lower),
-        "redirect": _find_all(REDIRECT_CUES, text_lower) + _find_all(KANNADA_REDIRECT_CUES, text_lower),
+        "redirect": (
+            _find_all(REDIRECT_CUES, text_lower)
+            + _find_all(KANNADA_REDIRECT_CUES, text_lower)
+            + _find_all(MIXED_LANGUAGE_REDIRECT_CUES, text_lower)
+        ),
         "extraction": _find_all(EXTRACTION_CUES, text_lower),
         "generic_greeting": _find_all(GENERIC_GREETING_CUES, text_lower),
     }
@@ -342,10 +359,13 @@ def extract_message(index: int, text: str) -> ExtractedMessage:
     em.url_evidence = [_analyze_url(u, u in em.suspicious_urls) for u in em.urls]
     em.domains = list(dict.fromkeys(_extract_domain(u) for u in em.urls))
 
-    # Organizations (very lightweight keyword spotting)
-    org_hits = [kw for kw in ORG_KEYWORDS if kw in text_lower]
+    # Organizations (very lightweight keyword spotting). Scan message text
+    # rather than URLs/domains so a hostname such as secure-bankverify.xyz does
+    # not itself become evidence that the sender is a legitimate/trusted bank.
+    message_text_for_orgs = URL_REGEX.sub(" ", text_lower)
+    org_hits = [kw for kw in ORG_KEYWORDS if kw in message_text_for_orgs]
     for kw in ["ಬ್ಯಾಂಕ್", "ಗ್ರಾಹಕ ಸೇವೆ", "ಸೈಬರ್ ಕ್ರೈಂ", "ಪೊಲೀಸ್", "ವಿದ್ಯುತ್ ಇಲಾಖೆ", "ಆದಾಯ ತೆರಿಗೆ", "ಕೂರಿಯರ್"]:
-        if kw in text_lower:
+        if kw in message_text_for_orgs:
             org_hits.append(kw)
     em.organizations = list(dict.fromkeys(org_hits))
 

@@ -46,7 +46,9 @@ def _observed_stages(em: ExtractedMessage, is_first: bool = False) -> List[str]:
     if is_first:
         observed.append("CONTACT")
 
-    if em.signals.get("impersonation") or em.organizations:
+    if em.signals.get("impersonation"):
+        # Organization mentions alone are not impersonation evidence.
+        # A benign message may legitimately mention a bank/company/portal.
         observed.append("TRUST_IMPERSONATION")
     if em.signals.get("urgency"):
         observed.append("PRESSURE")
@@ -336,3 +338,4 @@ def build_chain(extracted: List[ExtractedMessage]) -> Dict:
     result = _build_chain_core(extracted)
     result["message_contributions"] = _build_message_contributions(extracted, result)
     return result
+

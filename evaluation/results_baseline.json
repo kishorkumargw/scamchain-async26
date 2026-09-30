@@ -1,0 +1,914 @@
+{
+  "benchmark": "synthetic",
+  "summary": {
+    "total_cases": 28,
+    "suspicious_cases": 20,
+    "benign_cases": 8,
+    "benchmark_case_pass_rate_percent": 90.0,
+    "required_signal_recall_percent": 98.0,
+    "average_chain_completeness_percent": 100.0,
+    "benign_false_positive_rate_percent": 37.5,
+    "kannada_case_pass_rate_percent": 75.0,
+    "obfuscation_case_pass_rate_percent": 100.0
+  },
+  "cases": [
+    {
+      "id": "scenario_bank_otp",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_upi_payment",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_fake_customer_care",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP",
+        "Password"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_digital_arrest",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Aadhaar number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_fake_job",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Account number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_electricity",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Card number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_courier",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "CVV",
+        "Card number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_fake_loan",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Aadhaar number",
+        "Account number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "scenario_investment",
+      "group": "scenario",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Account number"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "stage_contact_only",
+      "group": "partial",
+      "passed": true,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT"
+      ],
+      "expected_chain": [
+        "CONTACT"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "CONTACT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "stage_impersonation",
+      "group": "partial",
+      "passed": true,
+      "detected_signals": [
+        "impersonation"
+      ],
+      "required_signals": [
+        "impersonation"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "TRUST_IMPERSONATION",
+      "expected_max_stage": "TRUST_IMPERSONATION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "stage_pressure",
+      "group": "partial",
+      "passed": true,
+      "detected_signals": [
+        "urgency"
+      ],
+      "required_signals": [
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "PRESSURE"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "PRESSURE"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "PRESSURE",
+      "expected_max_stage": "PRESSURE",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "stage_redirect",
+      "group": "partial",
+      "passed": false,
+      "detected_signals": [
+        "redirect"
+      ],
+      "required_signals": [
+        "redirect"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "REDIRECT"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "REDIRECT"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "REDIRECT",
+      "expected_max_stage": "REDIRECT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "stage_extraction",
+      "group": "partial",
+      "passed": true,
+      "detected_signals": [
+        "extraction"
+      ],
+      "required_signals": [
+        "extraction"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_meeting",
+      "group": "benign",
+      "passed": true,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "CONTACT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_parcel_delivered",
+      "group": "benign",
+      "passed": true,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "CONTACT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_official_app",
+      "group": "benign",
+      "passed": false,
+      "detected_signals": [
+        "impersonation"
+      ],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "TRUST_IMPERSONATION",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": false,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_power_bill",
+      "group": "benign",
+      "passed": false,
+      "detected_signals": [
+        "impersonation"
+      ],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "TRUST_IMPERSONATION",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": false,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_job_interview",
+      "group": "benign",
+      "passed": true,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "CONTACT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_company_portal",
+      "group": "benign",
+      "passed": false,
+      "detected_signals": [
+        "redirect"
+      ],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "REDIRECT"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "REDIRECT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": false,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_bank_statement",
+      "group": "benign",
+      "passed": false,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "TRUST_IMPERSONATION",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": false,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "benign_greeting",
+      "group": "benign",
+      "passed": true,
+      "detected_signals": [],
+      "required_signals": [],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "CONTACT",
+      "expected_max_stage": "CONTACT",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "kannada_bank_chain",
+      "group": "kannada",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "chain_completeness": 1.0,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "kannada_credential",
+      "group": "kannada",
+      "passed": true,
+      "detected_signals": [
+        "extraction"
+      ],
+      "required_signals": [
+        "extraction"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [
+        "OTP"
+      ],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "EXTRACTION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "kannada_mixed_language",
+      "group": "kannada",
+      "passed": false,
+      "detected_signals": [
+        "extraction",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "redirect",
+        "urgency"
+      ],
+      "missing_signals": [
+        "redirect"
+      ],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [
+        "OTP"
+      ],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": false,
+      "credential_ok": true
+    },
+    {
+      "id": "kannada_payment",
+      "group": "kannada",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "required_signals": [
+        "extraction",
+        "impersonation",
+        "urgency"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [],
+      "required_credentials": [],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "TRUST_IMPERSONATION",
+        "PRESSURE",
+        "EXTRACTION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "obfuscated_otp",
+      "group": "obfuscation",
+      "passed": true,
+      "detected_signals": [
+        "extraction"
+      ],
+      "required_signals": [
+        "extraction"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "OTP"
+      ],
+      "required_credentials": [
+        "OTP"
+      ],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "EXTRACTION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    },
+    {
+      "id": "obfuscated_password_click",
+      "group": "obfuscation",
+      "passed": true,
+      "detected_signals": [
+        "extraction",
+        "redirect"
+      ],
+      "required_signals": [
+        "extraction",
+        "redirect"
+      ],
+      "missing_signals": [],
+      "detected_credentials": [
+        "Password"
+      ],
+      "required_credentials": [
+        "Password"
+      ],
+      "missing_credentials": [],
+      "actual_chain": [
+        "CONTACT",
+        "REDIRECT",
+        "EXTRACTION"
+      ],
+      "expected_chain": null,
+      "chain_completeness": null,
+      "actual_max_stage": "EXTRACTION",
+      "expected_max_stage": "EXTRACTION",
+      "max_stage_ok": true,
+      "signal_ok": true,
+      "credential_ok": true
+    }
+  ]
+}
