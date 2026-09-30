@@ -214,7 +214,7 @@ CONTACT
 → TRUST / IMPERSONATION
 → PRESSURE
 → REDIRECT
-→ EXTRACTION
+→ EXTRACTION```text
 
 The included synthetic evaluation suite covers 28 cases: 20 suspicious and 8 benign, plus Kannada and obfuscation cases. The latest recorded run reports:
 
