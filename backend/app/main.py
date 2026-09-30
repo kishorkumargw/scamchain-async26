@@ -1,10 +1,8 @@
 """
 main.py
-FastAPI entrypoint. Wires steps 1-9 of the ScamChain pipeline into a single
-POST /analyze endpoint that the frontend (or curl, or Postman for the demo)
-calls with a list of raw messages (+ optional language) and gets back the
-full evidence graph, attack chain, per-stage breakdown, timeline, and
-threat story/response - already rendered in the requested language.
+FastAPI entrypoint. Wires the deterministic ScamChain pipeline into a single
+POST /analyze endpoint that returns the evidence graph, attack chain,
+per-stage breakdown, timeline, and defensive response.
 
 Run with:
     uvicorn app.main:app --reload --port 8000
@@ -19,7 +17,6 @@ from .extractor import extract_all
 from .chain_classifier import build_chain
 from .graph_builder import build_evidence_graph
 from .explainer import build_threat_story
-from .llm import generate_ai_narrative
 from .models import AnalyzeRequest, AnalyzeResponse
 from . import i18n
 from .scenarios import SCENARIOS
@@ -87,14 +84,9 @@ def analyze(req: AnalyzeRequest):
             relationships=chain_result["relationships"],
         )  # step 5
         story = build_threat_story(extracted, chain_result, lang=lang)            # steps 8-9 (localized)
-
-        if req.use_ai_narrative:
-            story = generate_ai_narrative(chain_result=chain_result, template_story=story, lang=lang)
     except Exception:
         # Never let an unexpected exception surface a raw traceback mid-demo.
-        # generate_ai_narrative already fails safe on its own, so anything
-        # reaching here is in the deterministic rule-based path - log it for
-        # after the demo, tell the caller something sane happened instead.
+        # Log the real exception server-side and return a clean client error.
         logger.exception("ScamChain pipeline failed for input of %d messages", len(req.messages))
         raise HTTPException(status_code=500, detail="Analysis failed unexpectedly. Check server logs.")
 

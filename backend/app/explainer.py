@@ -14,11 +14,9 @@ All English/Kannada text comes from i18n.py - this module only assembles
 WHICH structured facts to show; it never hardcodes display strings itself,
 so adding a third language later means editing i18n.py, not this file.
 
-Template-based by default (deterministic, always works, zero cost/latency -
-important for a live demo). If ANTHROPIC_API_KEY is set, llm.py can
-optionally re-narrate the SAME structured evidence more naturally, clearly
-labeled as LLM-assisted interpretation layered on top of - never replacing -
-this deterministic result (see llm.py and Feature 7 of the product brief).
+Template-based by default (deterministic, always works, zero external
+service dependency, and suitable for a live demo). The final submission keeps
+this local engine authoritative so the project does not depend on an API key.
 """
 
 from typing import List, Dict

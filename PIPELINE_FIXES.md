@@ -22,15 +22,15 @@ actually reproduced (not just inspected) and then verified fixed — see the
 
 **AI response parsing / environment variables**
 - `llm.py`'s optional Claude-narration hook was calling a model id
-  (`claude-sonnet-4-6`) that is only valid for Claude's in-browser artifact
+  an external narrative prototype was evaluated during development; it is not part of the final offline build.
   proxy, not the public Messages API a standalone script hits with a real
-  `ANTHROPIC_API_KEY`. Fixed to `claude-sonnet-5`.
+  an optional external narrative integration was explored during development; it is not part of the final offline submission.
 - JSON parsing of the model's reply used `str.removeprefix/removesuffix`
   chained fence-stripping, which breaks if the model adds any commentary
   around the JSON. Fixed to a regex extraction of the `{...}` object, so
   it survives extra text/whitespace around the JSON.
 - Confirmed (via `inspect.signature`) that the `messages.create(...)` call
-  shape and `Anthropic()` auto-reading `ANTHROPIC_API_KEY` both still match
+  shape was tested during development; the external integration is removed from the final submission.
   the installed SDK version.
 
 **Missing / mismatched dependencies**
@@ -38,7 +38,7 @@ actually reproduced (not just inspected) and then verified fixed — see the
   installed or tested. Re-pinned to the exact versions verified by a fresh
   `python3 -m venv` + `pip install -r requirements.txt` + full pipeline run
   (fastapi 0.141.1, uvicorn 0.53.0, networkx 3.6.1, pydantic 2.13.5,
-  anthropic 1.8.0).
+  external AI SDK is not included in the final requirements.
 
 **Graph visualization / offline demo risk**
 - The frontend loaded `vis-network` from a CDN (unpkg). At a venue with bad
@@ -121,7 +121,7 @@ just re-reading the code.
   courier, fake loan, investment). Every one is fictional content written
   to be recognized by the *same* shared lexicon — no per-scenario code path.
 - `models.py` / `main.py` — added `lang` (with fallback-to-English for
-  unsupported values) and `use_ai_narrative` to the request; response
+  unsupported values); the final request schema intentionally has no external AI/API flag.
   schema extended with the new localized/structured fields; added
   `GET /languages` and `GET /scenarios`.
 - `frontend/index.html` — full rewrite: language toggle (instant, no
