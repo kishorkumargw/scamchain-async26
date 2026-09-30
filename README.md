@@ -42,7 +42,68 @@ flowchart LR
 3. **Evidence graph** (`graph_builder.py`) connects attacker/sender, messages, organizations, URLs/domains, requested actions, and credentials.
 4. **Explanation** (`explainer.py`) separates concrete evidence from inference and generates stage-by-stage reasoning, risk level, and defensive guidance.
 5. **Presentation** (`i18n.py` + `frontend/i18n.js`) renders the same analysis in English or Kannada.
+## 4A. Key Features
 
+- Multi-message social-engineering analysis
+- Suspicious signal extraction
+- Lightweight entity extraction for organizations, URLs, domains, credentials, and requested actions
+- Attack-stage classification
+- Multi-message relationship analysis
+- Explainable evidence graph
+- Chronological attack-chain reconstruction
+- Stage-by-stage evidence and reasoning
+- Message contribution / turning-point analysis
+- Attack timeline visualization
+- Defensive response recommendations
+- English and Kannada presentation
+- Kannada-aware fraud signal detection
+- Obfuscation-aware matching such as O.T.P / O T P
+- Benign-message false-positive controls
+- Offline deterministic execution
+- Synthetic evaluation benchmark
+
+## 4B. Technical Implementation
+
+ScamChain uses a lightweight, explainable NLP and rule-based reasoning pipeline.
+
+### Text Processing
+
+- Unicode normalization
+- Case and whitespace normalization
+- Common scam-message obfuscation normalization
+- Regex-based pattern matching
+- Keyword and phrase lexicons
+
+### Signal Detection
+
+The extractor identifies signal families including:
+
+- Impersonation
+- Urgency / pressure
+- Redirect / external-link requests
+- Credential or money extraction
+- Generic greetings
+
+### Entity Extraction
+
+The system extracts:
+
+- Organizations
+- URLs
+- Domains
+- Credential types
+- Requested actions
+
+### Attack-Stage Classification
+
+Each message is mapped to the furthest stage supported by its evidence:
+
+```text
+CONTACT
+→ TRUST / IMPERSONATION
+→ PRESSURE
+→ REDIRECT
+→ EXTRACTION
 ## 5. Attack stages
 
 ```text
@@ -142,6 +203,18 @@ No API key is required.
 7. Switch to **ಕನ್ನಡ** to demonstrate the regional-language presentation.
 
 ## 12. QA / evaluation
+### Evidence Coverage
+
+The UI also displays an **Attack-Chain Evidence Coverage** percentage.
+
+This percentage represents the proportion of the five defined attack stages for which ScamChain has supporting evidence:
+
+```text
+CONTACT
+→ TRUST / IMPERSONATION
+→ PRESSURE
+→ REDIRECT
+→ EXTRACTION
 
 The included synthetic evaluation suite covers 28 cases: 20 suspicious and 8 benign, plus Kannada and obfuscation cases. The latest recorded run reports:
 

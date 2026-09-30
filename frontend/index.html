@@ -216,6 +216,20 @@
         <div><div class="label" id="verdictLabel">—</div></div>
         <div class="risktag" id="riskTag">—</div>
       </div>
+      <div class="panel coverage-panel" id="coveragePanel" style="display:none;">
+  <div class="coverage-head">
+    <div class="coverage-title" id="coverageTitle">Attack-Chain Evidence Coverage</div>
+    <div class="coverage-percent" id="coveragePercent">0%</div>
+  </div>
+
+  <div class="coverage-track">
+    <div class="coverage-fill" id="coverageFill"></div>
+  </div>
+
+  <div class="coverage-note" id="coverageNote">
+    0 / 5 attack stages supported by evidence
+  </div>
+</div>
 
       <div class="panel">
         <h2><span class="stepno">01</span> <span data-i18n="signals_heading">Signals detected</span></h2>
@@ -389,6 +403,34 @@ function setPipelineStep(n){
   document.querySelectorAll('.pipeline .step').forEach(el => {
     el.classList.toggle('done', parseInt(el.dataset.step,10) <= n);
   });
+}
+function renderCoverage(evidenceSummary){
+  const panel = document.getElementById('coveragePanel');
+  const percentEl = document.getElementById('coveragePercent');
+  const fillEl = document.getElementById('coverageFill');
+  const titleEl = document.getElementById('coverageTitle');
+  const noteEl = document.getElementById('coverageNote');
+
+  const percent = Math.max(
+    0,
+    Math.min(100, Number(evidenceSummary?.stage_evidence_coverage_percent || 0))
+  );
+
+  const supported = Number(evidenceSummary?.stages_supported_count || 0);
+  const total = Number(evidenceSummary?.stages_total || 5);
+
+  percentEl.textContent = `${percent}%`;
+  fillEl.style.width = `${percent}%`;
+
+  if(currentLang === 'kn'){
+    titleEl.textContent = 'ದಾಳಿಯ-ಸರಣಿ ಪುರಾವೆ ವ್ಯಾಪ್ತಿ';
+    noteEl.textContent = `${supported} / ${total} ದಾಳಿ ಹಂತಗಳಿಗೆ ಪುರಾವೆ ಕಂಡುಬಂದಿದೆ`;
+  }else{
+    titleEl.textContent = 'Attack-Chain Evidence Coverage';
+    noteEl.textContent = `${supported} / ${total} attack stages supported by evidence`;
+  }
+
+  panel.style.display = 'block';
 }
 
 function renderLadder(chain, stageBreakdown){
@@ -590,6 +632,8 @@ async function analyze(){
     clearTimeout(progressTimer1); clearTimeout(progressTimer2);
     setLoading(false);
     lastResult = data;
+
+renderCoverage(data.evidence_summary);
 
     const verdict = document.getElementById('verdict');
     verdict.style.display = 'flex';
