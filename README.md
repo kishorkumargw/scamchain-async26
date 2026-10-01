@@ -359,7 +359,10 @@ Contributions and improvements are welcome.
 
 ScamChain is released under the MIT License. See the `LICENSE` file for details.
 
-## 5. Attack stages## 
+
+
+```bat
+p## 5. Attack stages## 
 The included synthetic evaluation suite covers 28 cases: 20 suspicious and 8 benign, plus Kannada and obfuscation cases. The latest recorded run reports:
 
 - 100% synthetic suspicious-case pass rate
@@ -369,10 +372,7 @@ The included synthetic evaluation suite covers 28 cases: 20 suspicious and 8 ben
 - 100% Kannada case pass rate
 - 100% obfuscation case pass rate
 
-These are **synthetic benchmark results**, not claims of real-world accuracy. Re-run the benchmark with:
-
-```bat
-python evaluation\run_evaluation.py
+These are **synthetic benchmark results**, not claims of real-world accuracy. Re-run the benchmark with:ython evaluation\run_evaluation.py
 ```
 
 ## 13. Limitations
