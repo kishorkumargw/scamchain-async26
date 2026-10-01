@@ -533,16 +533,38 @@ function renderGraph(graph){
       else if(n.type === 'credential'){ color = '#e0793f'; shape='star'; }
       return { id: n.id, label: n.label, color: {background:color, border:color}, shape, size, font };
     });
-    const edges = graph.edges.map(e => ({ from: e.source, to: e.target, arrows: 'to', color: {color:'#2a3244', opacity:0.8} }));
+   const edges = graph.edges.map(e => ({
+  id: e.id,
+  from: e.source,
+  to: e.target,
+  arrows: 'to',
+  label: e.label || '',
+  color: {color:'#2a3244', opacity:0.8}
+}));
     const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
     const options = { physics: { stabilization: true, barnesHut: { gravitationalConstant: -4500, springLength: 120 } }, interaction: { hover: true } };
     if(network) network.destroy();
     network = new vis.Network(container, data, options);
+    network.on('click', function(params) {
+  if (params.edges.length === 0) return;
+
+  const edge = graph.edges.find(e => e.id === params.edges[0]);
+  if (!edge) return;
+
+  alert(
+    `Relationship: ${edge.label || edge.type}\n\n` +
+    `Why connected: ${edge.reason || 'Evidence-based relationship'}\n\n` +
+    `Evidence: ${(edge.evidence || []).join(', ') || 'None'}\n\n` +
+    `Strength: ${edge.strength || 'unknown'}`
+  );
+});
+
   }catch(e){
     container.style.display = 'none'; graphError.style.display = 'block';
     graphError.textContent = t('graph_error') + ' (' + e.message + ')';
   }
 }
+
 
 function renderStageBreakdown(stageBreakdown){
   const box = document.getElementById('stageBreakdown');
